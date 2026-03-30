@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Village Chronicles</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<!-- MENU SCREEN -->
+<div id="menu-screen">
+  <canvas id="menu-canvas"></canvas>
+  <div id="menu-content">
+    <div id="menu-title">Village Chronicles</div>
+    <div id="menu-subtitle">Build &nbsp;·&nbsp; Survive &nbsp;·&nbsp; Conquer</div>
+    <button id="menu-start">Begin Your Chronicle</button>
+  </div>
+  <div id="menu-version">v1.0 &nbsp;·&nbsp; Village Chronicles</div>
+</div>
+
+<!-- HUD -->
+<div id="hud">
+  <div class="hud-left">
+    <div class="hud-item">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+      <span id="hud-date">Year 1 — Jan 1</span>
+    </div>
+    <div class="hud-sep"></div>
+    <div class="hud-item">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/><line x1="12" y1="3" x2="12" y2="7"/><line x1="12" y1="17" x2="12" y2="21"/><line x1="3" y1="12" x2="7" y2="12"/><line x1="17" y1="12" x2="21" y2="12"/></svg>
+      <span id="hud-gold">0</span>
+      <span class="sub" id="hud-gps">(+0/s)</span>
+    </div>
+  </div>
+  <div class="hud-center"><span id="hud-village-name" style="font-family:'Cinzel',serif;font-size:14px;color:var(--gold);letter-spacing:1px;opacity:.85">Unnamed Village</span></div>
+  <div class="hud-right">
+    <div class="hud-item">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      <span id="hud-pop">0</span>/<span id="hud-cap">0</span>
+    </div>
+    <div class="hud-item">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      <span id="hud-defence">0</span>
+    </div>
+    <div class="hud-item">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>
+      <span id="hud-houses">0</span>
+    </div>
+  </div>
+</div>
+
+<!-- TABS -->
+<nav id="tabs">
+  <button class="tab-btn active" data-tab="map">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="1,6 1,22 8,18 16,22 23,18 23,2 16,6 8,2"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>
+    Map
+  </button>
+  <button class="tab-btn" data-tab="villagers">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+    Villagers
+  </button>
+  <button class="tab-btn" data-tab="defence">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+    Defence
+  </button>
+  <button class="tab-btn" data-tab="attacking">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="19" x2="19" y2="5"/><polyline points="15,5 19,5 19,9"/><line x1="5" y1="9" x2="9" y2="5"/><polyline points="5,15 5,19 9,19"/></svg>
+    Attacking
+  </button>
+  <button class="tab-btn" data-tab="alliance">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+    Alliances
+  </button>
+  <button class="tab-btn tab-btn-settings" data-tab="settings">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    Settings
+  </button>
+</nav>
+
+<!-- CONTENT -->
+<div id="content">
+
+  <!-- MAP -->
+  <div id="tab-map" class="tab-pane active">
+    <div id="map-wrap">
+      <canvas id="map-canvas"></canvas>
+      <div id="village-name-box" title="Click to rename">
+        <div id="village-name-label">Village Name</div>
+        <div id="village-name-display">Unnamed Village</div>
+      </div>
+      <div id="place-hint">Left-click to place &nbsp;·&nbsp; ESC to cancel</div>
+      <div id="map-controls">
+        <button class="map-btn" id="btn-recenter">Return to Village</button>
+        <button class="map-btn" id="btn-zoom-in">Zoom In</button>
+        <button class="map-btn" id="btn-zoom-out">Zoom Out</button>
+        <button class="map-btn" id="btn-rotate" style="display:none">Rotate (R)</button>
+        <button class="map-btn" id="btn-rename">Name Village</button>
+      </div>
+    </div>
+    <div id="map-sidebar">
+      <div class="sidebar-tabs">
+        <button class="sidebar-tab active" data-stab="shop">Shop</button>
+        <button class="sidebar-tab" data-stab="buildings">My Buildings</button>
+      </div>
+      <div id="stab-shop" class="sidebar-panel active">
+        <div class="shop-cats" id="shop-cats"></div>
+        <div id="shop-items"></div>
+      </div>
+      <div id="stab-buildings" class="sidebar-panel">
+        <div id="buildings-list"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- VILLAGERS -->
+  <div id="tab-villagers" class="tab-pane">
+    <div id="v-header">
+      <span id="v-title">Villagers</span>
+      <div id="v-filters">
+        <button class="vf-btn active" data-filter="all">All</button>
+        <button class="vf-btn" data-filter="idle">Idle</button>
+        <button class="vf-btn" data-filter="workers">Workers</button>
+        <button class="vf-btn" data-filter="combat">Combat</button>
+      </div>
+    </div>
+    <div id="v-stats-bar">
+      Population: <b id="vs-total">0</b>/<b id="vs-housed">0</b>
+      &nbsp; Deceased: <b id="vs-deceased">0</b>
+      &nbsp; Combat: <b id="vs-mil">0</b>
+    </div>
+    <div style="display:flex;flex:1;overflow:hidden">
+      <div id="villager-list" style="flex:1;overflow-y:auto"></div>
+      <div id="v-detail-panel" class="hidden">
+        <div class="vd-portrait" id="vd-portrait">
+          <span id="vd-initials">—</span>
+          <span class="vd-status" id="vd-status"></span>
+        </div>
+        <div class="vd-name" id="vd-name">—</div>
+        <div class="vd-job" id="vd-job-label">—</div>
+        <div class="vd-bars">
+          <div class="vd-bar-row"><span class="lbl">Health</span><div class="vd-bar-outer"><div class="vd-bar-inner" id="vdb-hp" style="background:#30a030"></div></div><span class="vd-bar-val" id="vdv-hp">—</span></div>
+          <div class="vd-bar-row"><span class="lbl">Hunger</span><div class="vd-bar-outer"><div class="vd-bar-inner" id="vdb-hunger" style="background:#b07020"></div></div><span class="vd-bar-val" id="vdv-hunger">—</span></div>
+          <div class="vd-bar-row"><span class="lbl">Thirst</span><div class="vd-bar-outer"><div class="vd-bar-inner" id="vdb-thirst" style="background:#2070b0"></div></div><span class="vd-bar-val" id="vdv-thirst">—</span></div>
+        </div>
+        <div class="vd-stats" id="vd-stats"></div>
+        <div class="vd-job-section">
+          <div class="vd-job-label">Assign Job</div>
+          <div class="vd-job-grid" id="vd-job-grid"></div>
+        </div>
+        <button class="vd-close" id="vd-close">Close ✕</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- DEFENCE -->
+  <div id="tab-defence" class="tab-pane">
+    <div class="section-header">
+      <span class="section-title">Village Defence</span>
+      <span style="font-size:12px;color:var(--dim)" id="def-status">No known threats</span>
+    </div>
+    <div class="defence-body">
+      <div class="defence-col">
+        <div class="col-title">Military Strength</div>
+        <div class="col-body"><div class="mil-stats" id="mil-stats"></div></div>
+      </div>
+      <div class="defence-col">
+        <div class="col-title">Impending Attacks</div>
+        <div class="col-body" id="pending-attacks"><div class="empty-state">No known attacks inbound.</div></div>
+      </div>
+      <div class="defence-col">
+        <div class="col-title">Battle Log</div>
+        <div class="col-body" id="battle-log"><div class="empty-state">No battles recorded.</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ATTACKING -->
+  <div id="tab-attacking" class="tab-pane">
+    <div class="section-header">
+      <span class="section-title">Raiding &amp; Conquest</span>
+      <span style="font-size:12px;color:var(--dim)" id="atk-refresh">Targets refresh: 5:00</span>
+    </div>
+    <div class="attacking-body">
+      <div class="attack-left">
+        <div class="col-title">Available Targets</div>
+        <div style="flex:1;overflow-y:auto" id="attack-targets"></div>
+      </div>
+      <div class="attack-right">
+        <div class="col-title">Hostages (<span id="hostage-count">0</span>)</div>
+        <div style="flex:1;overflow-y:auto" id="hostages-list"></div>
+        <div class="col-title">Raid Log</div>
+        <div style="flex:0 0 180px;overflow-y:auto" id="raid-log"><div class="empty-state" style="font-size:11px">No raids yet.</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ALLIANCE -->
+  <div id="tab-alliance" class="tab-pane">
+    <div class="section-header">
+      <span class="section-title">Diplomacy &amp; Alliances</span>
+      <span style="font-size:12px;color:var(--dim)" id="al-refresh">Offers refresh: 5:00</span>
+    </div>
+    <div class="alliance-body">
+      <div class="alliance-left">
+        <div class="col-title">Available for Alliance</div>
+        <div style="flex:1;overflow-y:auto" id="alliance-offers"></div>
+      </div>
+      <div class="alliance-right">
+        <div class="col-title">Active Alliances</div>
+        <div style="flex:1;overflow-y:auto" id="active-alliances"><div class="empty-state" style="font-size:11px">No alliances.</div></div>
+        <div class="col-title">Incoming Requests</div>
+        <div style="flex:0 0 140px;overflow-y:auto" id="alliance-requests"><div class="empty-state" style="font-size:11px">None.</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SETTINGS -->
+  <div id="tab-settings" class="tab-pane">
+    <div class="section-header">
+      <span class="section-title">Settings</span>
+    </div>
+    <div class="settings-body">
+      <div class="settings-group">
+        <div class="settings-group-title">Notifications</div>
+        <div class="settings-row">
+          <div class="settings-row-info">
+            <div class="settings-row-label">Show Notifications</div>
+            <div class="settings-row-desc">Display pop-up messages for events, raids, and arrivals.</div>
+          </div>
+          <button class="toggle-btn" id="toggle-notifs"></button>
+        </div>
+      </div>
+      <div class="settings-group">
+        <div class="settings-group-title">Legacy &amp; Founding</div>
+        <div class="settings-row" style="flex-direction:column;align-items:flex-start;gap:10px">
+          <div id="founding-info" style="width:100%"></div>
+          <div style="display:flex;align-items:center;justify-content:space-between;width:100%;gap:20px">
+            <div class="settings-row-info">
+              <div class="settings-row-label">Found a New Village</div>
+              <div class="settings-row-desc">Requires 100,000g. Resets your village but grants permanent Founding Upgrades that make every future chronicle stronger.</div>
+            </div>
+            <button class="btn btn-primary" id="btn-found-village" style="flex-shrink:0">Found Village</button>
+          </div>
+        </div>
+      </div>
+      <div class="settings-group">
+        <div class="settings-group-title">Game</div>
+        <div class="settings-row">
+          <div class="settings-row-info">
+            <div class="settings-row-label">Restart Game</div>
+            <div class="settings-row-desc">Wipe all progress — including founding upgrades — and start completely fresh.</div>
+          </div>
+          <button class="btn btn-danger" id="btn-restart-game">Restart</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ARRIVAL POPUP -->
+<div id="arrival-popup">
+  <div class="arrival-avatar">
+    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#8a7850" stroke-width="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+  </div>
+  <div class="arrival-info">
+    <div class="arrival-name" id="arr-name">—</div>
+    <div class="arrival-sub" id="arr-sub">—</div>
+    <div class="arrival-stats" id="arr-stats"></div>
+  </div>
+  <div class="arrival-actions">
+    <button class="arr-btn arr-btn-yes" id="arr-yes" title="Accept">✓</button>
+    <button class="arr-btn arr-btn-no" id="arr-no" title="Deny">✕</button>
+  </div>
+</div>
+
+<!-- NOTIFICATION LOG -->
+<div id="notif-log"></div>
+
+<!-- MODAL -->
+<div id="modal-overlay">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title" id="modal-title">—</span>
+      <button class="modal-close" id="modal-close">&#x2715;</button>
+    </div>
+    <div class="modal-body" id="modal-body"></div>
+    <div class="modal-footer" id="modal-footer"></div>
+  </div>
+</div>
+
+<script src="js/names.js"></script>
+<script src="js/catalog.js"></script>
+<script src="js/state.js"></script>
+<script src="js/save.js"></script>
+<script src="js/date.js"></script>
+<script src="js/notifications.js"></script>
+<script src="js/economy.js"></script>
+<script src="js/villagers.js"></script>
+<script src="js/world.js"></script>
+<script src="js/map.js"></script>
+<script src="js/shop.js"></script>
+<script src="js/villager-tab.js"></script>
+<script src="js/hud.js"></script>
+<script src="js/defence.js"></script>
+<script src="js/combat.js"></script>
+<script src="js/alliance.js"></script>
+<script src="js/founding.js"></script>
+<script src="js/menu.js"></script>
+<script src="js/game.js"></script>
+</body>
+</html>

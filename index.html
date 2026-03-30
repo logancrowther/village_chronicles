@@ -1,0 +1,1552 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Village Chronicles</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#141008;--panel:#1c1710;--panel2:#232016;--panel3:#2a261a;
+  --border:#302810;--border2:#3e3218;--gold:#c8a84b;--gold2:#e0bc60;
+  --text:#d0c098;--dim:#8a7850;--faint:#4a3e20;
+  --red:#7a1c1c;--red2:#b83030;--green:#185018;--green2:#228822;
+  --blue:#162840;--blue2:#205888;--row:#1e1a0e;--rowh:#252016;
+}
+html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(--text);font-family:'Crimson Text',Georgia,serif;font-size:15px;display:flex;flex-direction:column}
+
+/* ── HUD ── */
+#hud{display:flex;align-items:center;height:44px;background:#120e06;border-bottom:1px solid var(--border2);padding:0 16px;gap:0;flex-shrink:0;z-index:20}
+.hud-left{display:flex;align-items:center;gap:20px;flex:1}
+.hud-center{flex:0 0 auto;text-align:center}
+.hud-right{display:flex;align-items:center;gap:18px;justify-content:flex-end;flex:1}
+.hud-item{display:flex;align-items:center;gap:7px;font-family:'Cinzel',serif;font-size:13px;color:var(--gold)}
+.hud-item svg{opacity:.75;flex-shrink:0}
+.hud-item .sub{font-size:11px;color:var(--dim);margin-left:2px}
+.hud-sep{width:1px;height:22px;background:var(--border2)}
+#hud-date{font-family:'Cinzel',serif;font-size:13px;color:var(--gold);letter-spacing:.5px}
+
+/* ── TABS ── */
+#tabs{display:flex;align-items:center;height:46px;background:#0e0b04;border-bottom:1px solid var(--border2);padding:0 8px;gap:3px;flex-shrink:0}
+.tab-btn{display:flex;align-items:center;gap:8px;padding:0 16px;height:34px;background:none;border:none;border-radius:4px;color:var(--dim);font-family:'Cinzel',serif;font-size:12px;letter-spacing:.8px;text-transform:uppercase;cursor:pointer;transition:all .15s;white-space:nowrap}
+.tab-btn:hover{color:var(--text);background:var(--panel2)}
+.tab-btn.active{background:var(--gold);color:#100c02;font-weight:700}
+.tab-btn.active svg{color:#100c02}
+.tab-btn svg{flex-shrink:0;transition:color .15s}
+
+/* ── CONTENT ── */
+#content{display:flex;flex:1;overflow:hidden;min-height:0}
+.tab-pane{display:none;width:100%;height:100%;min-height:0}
+.tab-pane.active{display:flex;flex-direction:column;overflow:hidden}
+#tab-map.active{flex-direction:row}
+
+/* ── MAP TAB ── */
+#map-wrap{position:relative;flex:1;overflow:hidden}
+#map-canvas{display:block}
+#map-controls{position:absolute;bottom:12px;left:12px;display:flex;flex-direction:column;gap:5px}
+.map-btn{padding:6px 13px;background:rgba(18,12,4,.9);border:1px solid var(--border2);color:var(--gold);font-family:'Cinzel',serif;font-size:11px;cursor:pointer;letter-spacing:.4px;border-radius:3px}
+.map-btn:hover{background:var(--panel2);border-color:var(--gold)}
+#place-hint{position:absolute;top:12px;left:50%;transform:translateX(-50%);background:rgba(18,12,4,.92);border:1px solid var(--gold);color:var(--gold2);padding:6px 18px;font-family:'Cinzel',serif;font-size:12px;display:none;border-radius:3px;pointer-events:none}
+#map-sidebar{width:295px;background:var(--panel);border-left:1px solid var(--border2);display:flex;flex-direction:column;overflow:hidden}
+.sidebar-tabs{display:flex;border-bottom:1px solid var(--border2)}
+.sidebar-tab{flex:1;padding:8px;background:none;border:none;color:var(--dim);font-family:'Cinzel',serif;font-size:11px;cursor:pointer;border-bottom:2px solid transparent;transition:all .15s;text-transform:uppercase;letter-spacing:.4px}
+.sidebar-tab.active{color:var(--gold);border-bottom-color:var(--gold);background:var(--panel2)}
+.sidebar-panel{display:none;flex:1;overflow-y:auto}
+.sidebar-panel.active{display:flex;flex-direction:column}
+.shop-cats{display:flex;flex-wrap:wrap;gap:4px;padding:8px}
+.shop-cat{padding:4px 8px;background:var(--panel2);border:1px solid var(--border);color:var(--dim);font-size:10px;cursor:pointer;border-radius:3px;font-family:'Cinzel',serif;letter-spacing:.3px;text-transform:uppercase}
+.shop-cat.active{background:var(--border2);color:var(--gold);border-color:var(--gold)}
+#shop-items{padding:0 8px 8px}
+.shop-item{background:var(--panel2);border:1px solid var(--border);margin-bottom:5px;border-radius:3px;overflow:hidden;cursor:pointer;transition:border-color .15s}
+.shop-item:hover{border-color:var(--border2)}
+.shop-item.selected{border-color:var(--gold)}
+.shop-item-head{display:flex;justify-content:space-between;align-items:center;padding:6px 8px;background:var(--panel3)}
+.shop-item-name{font-family:'Cinzel',serif;font-size:11px;color:var(--text)}
+.shop-item-cost{font-size:12px;color:var(--gold);font-weight:600}
+.shop-item-desc{padding:3px 8px 5px;font-size:11px;color:var(--dim);line-height:1.4}
+.shop-item-meta{display:flex;flex-wrap:wrap;gap:5px;padding:0 8px 5px;font-size:10px;color:var(--faint)}
+.shop-item-meta span{background:var(--panel3);padding:1px 5px;border-radius:2px}
+.buy-btn{display:block;width:calc(100% - 16px);margin:0 8px 7px;padding:5px;background:var(--green);border:1px solid var(--green2);color:#80c080;font-family:'Cinzel',serif;font-size:11px;cursor:pointer;border-radius:2px;letter-spacing:.3px}
+.buy-btn:hover{background:var(--green2)}
+.buy-btn:disabled{background:var(--panel3);color:var(--faint);border-color:var(--border);cursor:not-allowed}
+.placed-item{background:var(--panel2);border:1px solid var(--border);margin:4px 8px;border-radius:3px;overflow:hidden}
+.placed-item-head{display:flex;justify-content:space-between;align-items:center;padding:5px 8px;background:var(--panel3)}
+.placed-item-name{font-family:'Cinzel',serif;font-size:11px;color:var(--text)}
+.placed-item-id{font-size:10px;color:var(--faint)}
+.placed-item-body{padding:3px 8px 5px;font-size:11px;color:var(--dim)}
+.placed-item-body .row{display:flex;justify-content:space-between;margin:1px 0}
+.upgrade-btn{display:block;width:calc(100% - 16px);margin:0 8px 6px;padding:4px;background:var(--blue);border:1px solid var(--blue2);color:#80a8d0;font-family:'Cinzel',serif;font-size:10px;cursor:pointer;border-radius:2px}
+.upgrade-btn:hover{background:var(--blue2)}
+.upgrade-btn:disabled{background:var(--panel3);color:var(--faint);border-color:var(--border);cursor:not-allowed}
+
+/* ── VILLAGERS TAB ── */
+#tab-villagers{flex-direction:column;overflow:hidden}
+#v-header{display:flex;align-items:center;justify-content:space-between;padding:16px 20px 12px;flex-shrink:0}
+#v-title{font-family:'Cinzel',serif;font-size:22px;font-weight:700;color:var(--text);letter-spacing:1px;text-transform:uppercase}
+#v-filters{display:flex;gap:5px}
+.vf-btn{padding:5px 14px;background:var(--panel2);border:1px solid var(--border2);color:var(--dim);font-family:'Cinzel',serif;font-size:11px;letter-spacing:.4px;cursor:pointer;border-radius:3px;transition:all .15s}
+.vf-btn:hover{color:var(--text)}
+.vf-btn.active{background:var(--gold);border-color:var(--gold);color:#100c02;font-weight:700}
+#v-stats-bar{padding:0 20px 12px;font-size:13px;color:var(--dim);display:flex;gap:18px;flex-shrink:0}
+#v-stats-bar b{color:var(--text)}
+#villager-list{flex:1;overflow-y:auto}
+.v-row{display:flex;align-items:center;gap:14px;padding:13px 20px;border-bottom:1px solid var(--border);background:var(--row);cursor:pointer;transition:background .12s;position:relative}
+.v-row:hover{background:var(--rowh)}
+.v-row.expanded{background:var(--rowh)}
+.v-avatar{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Cinzel',serif;font-size:15px;font-weight:700;color:#100c02;flex-shrink:0;letter-spacing:0}
+.v-info{flex:1;min-width:0}
+.v-name{font-family:'Cinzel',serif;font-size:14px;font-weight:600;color:var(--text);letter-spacing:.5px;text-transform:uppercase;margin-bottom:3px}
+.v-sub{display:flex;align-items:center;gap:10px;font-size:12px;color:var(--dim)}
+.v-sub .job-tag{color:var(--gold)}
+.v-sub .job-tag.mil{color:#e09060}
+.v-sub .star{color:var(--gold);font-size:11px}
+.v-right{display:flex;align-items:center;gap:10px;flex-shrink:0}
+.v-bars{display:flex;flex-direction:column;gap:3px;width:130px}
+.v-bar{height:5px;background:var(--border2);border-radius:3px;overflow:hidden}
+.v-bar-hp{background:#30a030}
+.v-bar-hunger{background:#b07020}
+.v-bar-thirst{background:#2070b0}
+.v-chevron{color:var(--dim);font-size:14px;transition:transform .2s;line-height:1}
+.v-row.expanded .v-chevron{transform:rotate(180deg)}
+.v-expand{display:none;background:var(--panel2);border-bottom:1px solid var(--border2);padding:14px 20px 14px 78px}
+.v-expand.open{display:flex;gap:24px;flex-wrap:wrap}
+.v-expand-col{flex:1;min-width:180px}
+.v-expand-label{font-family:'Cinzel',serif;font-size:10px;color:var(--dim);text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px}
+.job-grid{display:grid;grid-template-columns:1fr 1fr;gap:4px}
+.job-opt{padding:6px 8px;background:var(--panel3);border:1px solid var(--border);border-radius:3px;cursor:pointer;transition:border-color .12s}
+.job-opt:hover{border-color:var(--border2)}
+.job-opt.active{border-color:var(--gold);background:var(--panel2)}
+.job-opt.locked{opacity:.4;cursor:not-allowed}
+.job-opt-name{font-family:'Cinzel',serif;font-size:10px;color:var(--text);margin-bottom:1px}
+.job-opt-desc{font-size:10px;color:var(--dim)}
+.job-cost{font-size:9px;color:var(--gold)}
+.v-dead{opacity:.45;filter:grayscale(.8)}
+
+/* ── ARRIVAL POPUP ── */
+#arrival-popup{position:fixed;top:70px;left:50%;transform:translateX(-50%);z-index:300;background:#1c1810;border:1px solid var(--border2);border-radius:6px;padding:18px 22px;display:flex;align-items:center;gap:16px;min-width:420px;box-shadow:0 12px 50px rgba(0,0,0,.85);display:none}
+#arrival-popup.visible{display:flex}
+.arrival-avatar{width:52px;height:52px;border-radius:50%;background:#2a2620;border:1px solid var(--border2);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.arrival-info{flex:1}
+.arrival-name{font-family:'Cinzel',serif;font-size:17px;font-weight:700;color:var(--text);letter-spacing:.5px;margin-bottom:3px}
+.arrival-sub{font-size:12px;color:var(--dim);margin-bottom:7px}
+.arrival-stats{display:flex;gap:14px;font-size:13px;color:var(--text)}
+.arrival-stats span{display:flex;align-items:center;gap:4px}
+.arrival-actions{display:flex;gap:8px;flex-shrink:0}
+.arr-btn{width:38px;height:38px;border-radius:4px;border:1px solid;background:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:18px;transition:background .15s}
+.arr-btn-yes{border-color:#2a7a2a;color:#2a7a2a}
+.arr-btn-yes:hover{background:#1a4a1a}
+.arr-btn-no{border-color:#7a2020;color:#7a2020}
+.arr-btn-no:hover{background:#4a1212}
+
+/* ── DEFENCE TAB ── */
+#tab-defence{flex-direction:column;overflow:hidden}
+.section-header{padding:10px 16px;background:var(--panel);border-bottom:1px solid var(--border2);display:flex;justify-content:space-between;align-items:center;flex-shrink:0}
+.section-title{font-family:'Cinzel',serif;font-size:13px;color:var(--gold)}
+.defence-body{flex:1;display:flex;overflow:hidden}
+.defence-col{flex:1;display:flex;flex-direction:column;overflow:hidden;border-right:1px solid var(--border)}
+.defence-col:last-child{border-right:none}
+.col-title{padding:8px 12px;font-family:'Cinzel',serif;font-size:10px;color:var(--gold);background:var(--panel2);border-bottom:1px solid var(--border);text-transform:uppercase;letter-spacing:.5px;flex-shrink:0}
+.col-body{flex:1;overflow-y:auto;padding:8px}
+.mil-stats{display:grid;grid-template-columns:1fr 1fr;gap:5px;padding:8px}
+.mil-stat{background:var(--panel2);border:1px solid var(--border);padding:8px;border-radius:3px;text-align:center}
+.mil-stat .n{font-family:'Cinzel',serif;font-size:20px;color:var(--text)}
+.mil-stat .l{font-size:10px;color:var(--dim);text-transform:uppercase;letter-spacing:.4px}
+.attack-item{background:var(--panel2);border:1px solid var(--border);margin-bottom:5px;border-radius:3px;padding:8px 10px}
+.attack-item.urgent{border-color:var(--red2)}
+.attack-item-title{font-family:'Cinzel',serif;font-size:11px;color:var(--text);margin-bottom:2px}
+.attack-item-sub{font-size:11px;color:var(--dim);margin-bottom:3px}
+.attack-timer{font-size:11px;color:var(--red2);font-family:'Cinzel',serif}
+.log-item{font-size:12px;color:var(--dim);padding:5px 0;border-bottom:1px solid var(--border);line-height:1.5}
+.outcome-win{color:#30a030}.outcome-loss{color:var(--red2)}
+
+/* ── ATTACKING TAB ── */
+#tab-attacking{flex-direction:column;overflow:hidden}
+.attacking-body{flex:1;display:flex;overflow:hidden}
+.attack-left{flex:1;display:flex;flex-direction:column;overflow:hidden;border-right:1px solid var(--border)}
+.attack-right{width:250px;display:flex;flex-direction:column;overflow:hidden}
+.target-item{background:var(--panel2);border:1px solid var(--border);margin:5px 8px;border-radius:3px;overflow:hidden}
+.target-head{display:flex;justify-content:space-between;align-items:center;padding:7px 10px;background:var(--panel3)}
+.target-name{font-family:'Cinzel',serif;font-size:12px;color:var(--text)}
+.target-wealth{font-size:11px;color:var(--gold)}
+.target-body{padding:5px 10px;font-size:11px;color:var(--dim);line-height:1.6}
+.target-actions{padding:3px 10px 7px;display:flex;gap:5px}
+.small-btn{padding:4px 10px;font-family:'Cinzel',serif;font-size:10px;cursor:pointer;border-radius:2px;border:1px solid;letter-spacing:.3px}
+.small-btn-attack{background:var(--red);border-color:var(--red2);color:#d08080}
+.small-btn-attack:hover{background:var(--red2)}
+.hostage-item{background:var(--panel2);border:1px solid var(--border);margin:4px 8px;border-radius:3px;padding:7px 10px}
+.hostage-name{font-family:'Cinzel',serif;font-size:11px;color:var(--text)}
+.hostage-status{font-size:11px;color:var(--dim)}
+.feed-btn{margin-top:4px;padding:3px 8px;background:var(--panel3);border:1px solid var(--border2);color:var(--gold);font-size:10px;cursor:pointer;border-radius:2px}
+
+/* ── ALLIANCE TAB ── */
+#tab-alliance{flex-direction:column;overflow:hidden}
+.alliance-body{flex:1;display:flex;overflow:hidden}
+.alliance-left{flex:1;border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden}
+.alliance-right{width:250px;display:flex;flex-direction:column;overflow:hidden}
+.alliance-item{background:var(--panel2);border:1px solid var(--border);margin:5px 8px;border-radius:3px;overflow:hidden}
+.alliance-head{display:flex;justify-content:space-between;align-items:center;padding:7px 10px;background:var(--panel3)}
+.alliance-head-name{font-family:'Cinzel',serif;font-size:12px;color:var(--text)}
+.alliance-body-text{padding:5px 10px 4px;font-size:11px;color:var(--dim);line-height:1.5}
+.alliance-actions{padding:3px 10px 8px;display:flex;gap:5px}
+.small-btn-peace{background:#3a2808;border-color:var(--border2);color:var(--gold)}
+.small-btn-peace:hover{background:#4a3010}
+.small-btn-full{background:#183010;border-color:#305a30;color:#80c080}
+.small-btn-full:hover{background:#1a4018}
+.active-alliance-item{background:var(--panel2);border:1px solid var(--border);margin:4px 8px;border-radius:3px;padding:7px 10px}
+.act-al-name{font-family:'Cinzel',serif;font-size:11px;color:var(--text);margin-bottom:3px;display:flex;align-items:center;gap:7px}
+.act-al-sub{font-size:11px;color:var(--dim)}
+.break-btn{margin-top:5px;padding:3px 8px;background:var(--red);border:1px solid var(--red2);color:#d08080;font-size:10px;cursor:pointer;border-radius:2px}
+.alliance-type{font-size:10px;padding:1px 6px;border-radius:2px;font-family:'Cinzel',serif}
+.type-peace{background:#3a2808;color:var(--gold);border:1px solid var(--border2)}
+.type-full{background:#183010;color:#80c080;border:1px solid #305a30}
+
+/* ── NOTIFICATION LOG ── */
+#notif-log{position:fixed;bottom:0;right:0;width:295px;max-height:55vh;overflow-y:auto;display:flex;flex-direction:column-reverse;gap:2px;padding:8px 8px;pointer-events:none;z-index:50}
+.notif-card{background:rgba(22,17,8,.96);border:1px solid var(--border2);border-radius:4px;padding:10px 12px;display:flex;gap:10px;pointer-events:auto;align-items:flex-start;animation:fadeIn .3s ease}
+.notif-card.info{border-left:3px solid var(--blue2)}
+.notif-card.danger{border-left:3px solid var(--red2)}
+.notif-card.success{border-left:3px solid var(--green2)}
+.notif-card.warn{border-left:3px solid var(--gold)}
+.notif-icon{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;margin-top:1px}
+.notif-icon.info{background:#16284020;color:#5888c0;border:1px solid var(--blue2)}
+.notif-icon.danger{background:#5a18181a;color:var(--red2);border:1px solid var(--red2)}
+.notif-icon.success{background:#18501818;color:#40a040;border:1px solid var(--green2)}
+.notif-icon.warn{background:#5a381010;color:var(--gold);border:1px solid var(--gold)}
+.notif-body{flex:1;min-width:0}
+.notif-msg{font-size:12px;color:var(--text);line-height:1.5;margin-bottom:2px}
+.notif-time{font-size:10px;color:var(--faint)}
+.notif-close{background:none;border:none;color:var(--faint);font-size:14px;cursor:pointer;line-height:1;padding:0;flex-shrink:0;margin-top:1px}
+.notif-close:hover{color:var(--dim)}
+@keyframes fadeIn{from{opacity:0;transform:translateX(12px)}to{opacity:1;transform:translateX(0)}}
+
+/* ── MODAL ── */
+#modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;display:none;align-items:center;justify-content:center}
+#modal-overlay.open{display:flex}
+.modal{background:var(--panel);border:1px solid var(--border2);max-width:520px;width:90%;max-height:80vh;display:flex;flex-direction:column;border-radius:4px;box-shadow:0 12px 50px rgba(0,0,0,.85)}
+.modal-header{padding:14px 18px;background:var(--panel2);border-bottom:1px solid var(--border2);display:flex;justify-content:space-between;align-items:center}
+.modal-title{font-family:'Cinzel',serif;font-size:15px;color:var(--gold);font-weight:600}
+.modal-close{background:none;border:none;color:var(--dim);font-size:18px;cursor:pointer}
+.modal-close:hover{color:var(--text)}
+.modal-body{padding:16px 18px;overflow-y:auto;flex:1;font-size:14px;line-height:1.6;color:var(--text)}
+.modal-footer{padding:12px 18px;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:flex-end}
+.btn{padding:7px 18px;font-family:'Cinzel',serif;font-size:12px;cursor:pointer;border-radius:3px;letter-spacing:.4px;border:1px solid}
+.btn-primary{background:var(--green);border-color:var(--green2);color:#80c080}
+.btn-primary:hover{background:var(--green2)}
+.btn-danger{background:var(--red);border-color:var(--red2);color:#d09090}
+.btn-danger:hover{background:var(--red2)}
+.btn-neutral{background:var(--panel2);border-color:var(--border2);color:var(--text)}
+.btn-neutral:hover{background:var(--panel3)}
+
+/* ── MISC ── */
+.empty-state{text-align:center;color:var(--faint);font-style:italic;padding:20px 16px;font-size:12px}
+.gold-text{color:var(--gold)} .red-text{color:var(--red2)} .green-text{color:#30a030}
+hr.divider{border:none;border-top:1px solid var(--border);margin:8px 0}
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:var(--panel)}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+::-webkit-scrollbar-thumb:hover{background:var(--gold)}
+
+/* ── GAME HIDDEN UNTIL MENU DISMISSED ── */
+#hud,#tabs,#content,#notif-log,#arrival-popup,#modal-overlay{visibility:hidden}
+body.game-started #hud,body.game-started #tabs,body.game-started #content,body.game-started #notif-log,body.game-started #arrival-popup,body.game-started #modal-overlay{visibility:visible}
+
+/* ── MENU SCREEN ── */
+#menu-screen{position:fixed;inset:0;z-index:1000;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#080604}
+#menu-canvas{position:absolute;inset:0;width:100%;height:100%}
+#menu-content{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;gap:0;text-align:center;padding:40px 60px;background:rgba(8,6,4,.55);border:1px solid rgba(200,168,75,.18);border-radius:6px}
+#menu-title{font-family:'Cinzel',serif;font-size:52px;font-weight:700;color:var(--gold);letter-spacing:4px;text-transform:uppercase;line-height:1;text-shadow:0 0 60px rgba(200,168,75,.4),0 2px 8px rgba(0,0,0,.8);margin-bottom:10px}
+#menu-subtitle{font-family:'Crimson Text',serif;font-size:17px;color:var(--dim);letter-spacing:3px;text-transform:uppercase;margin-bottom:40px}
+#menu-start{padding:14px 48px;background:none;border:1px solid var(--gold);color:var(--gold);font-family:'Cinzel',serif;font-size:15px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;border-radius:3px;transition:all .25s;position:relative;overflow:hidden}
+#menu-start::before{content:'';position:absolute;inset:0;background:var(--gold);transform:scaleX(0);transform-origin:left;transition:transform .25s;z-index:-1}
+#menu-start:hover{color:#100c02;background:var(--gold)}
+#menu-version{position:absolute;bottom:16px;right:20px;font-size:11px;color:var(--faint);font-family:'Cinzel',serif;letter-spacing:1px}
+
+/* ── VILLAGER DETAIL PANEL ── */
+#v-detail-panel{width:320px;background:var(--panel);border-left:1px solid var(--border2);display:flex;flex-direction:column;overflow:hidden;flex-shrink:0}
+#v-detail-panel.hidden{display:none}
+.vd-portrait{height:100px;display:flex;align-items:center;justify-content:center;font-family:'Cinzel',serif;font-size:36px;font-weight:700;color:#100c02;position:relative;flex-shrink:0}
+.vd-portrait .vd-status{position:absolute;bottom:8px;right:10px;font-size:10px;font-family:'Crimson Text',serif;color:rgba(255,255,255,.6)}
+.vd-name{font-family:'Cinzel',serif;font-size:15px;font-weight:700;color:var(--text);padding:12px 16px 2px;letter-spacing:.5px}
+.vd-job{font-size:12px;color:var(--gold);padding:0 16px 10px;border-bottom:1px solid var(--border)}
+.vd-stats{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:10px 16px;border-bottom:1px solid var(--border)}
+.vd-stat{background:var(--panel2);border:1px solid var(--border);padding:7px 9px;border-radius:3px}
+.vd-stat .n{font-family:'Cinzel',serif;font-size:17px;color:var(--text)}
+.vd-stat .l{font-size:10px;color:var(--dim);text-transform:uppercase;letter-spacing:.4px}
+.vd-bars{padding:8px 16px;border-bottom:1px solid var(--border)}
+.vd-bar-row{display:flex;align-items:center;gap:8px;margin-bottom:5px;font-size:11px;color:var(--dim)}
+.vd-bar-row .lbl{width:46px;text-align:right;flex-shrink:0}
+.vd-bar-outer{flex:1;height:6px;background:var(--border2);border-radius:3px;overflow:hidden}
+.vd-bar-inner{height:100%;border-radius:3px;transition:width .4s}
+.vd-bar-val{width:30px;text-align:left;flex-shrink:0;color:var(--text)}
+.vd-job-section{flex:1;overflow-y:auto;padding:8px 16px}
+.vd-job-label{font-family:'Cinzel',serif;font-size:10px;color:var(--dim);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px}
+.vd-job-grid{display:grid;grid-template-columns:1fr 1fr;gap:4px}
+.vd-job-opt{padding:6px 8px;background:var(--panel2);border:1px solid var(--border);border-radius:3px;cursor:pointer;transition:border-color .12s}
+.vd-job-opt:hover{border-color:var(--border2)}
+.vd-job-opt.active{border-color:var(--gold);background:var(--panel3)}
+.vd-job-opt.locked{opacity:.38;cursor:not-allowed}
+.vd-job-opt-name{font-family:'Cinzel',serif;font-size:10px;color:var(--text);margin-bottom:1px}
+.vd-job-opt-sub{font-size:9px;color:var(--dim)}
+.vd-close{display:flex;align-items:center;justify-content:center;padding:10px;border-top:1px solid var(--border);background:none;border-left:none;border-right:none;border-bottom:none;color:var(--dim);font-family:'Cinzel',serif;font-size:11px;cursor:pointer;letter-spacing:.5px;flex-shrink:0}
+.vd-close:hover{color:var(--text);background:var(--panel2)}
+</style>
+</head>
+<body>
+
+<!-- MENU SCREEN -->
+<div id="menu-screen">
+  <canvas id="menu-canvas"></canvas>
+  <div id="menu-content">
+    <div id="menu-title">Village Chronicles</div>
+    <div id="menu-subtitle">Build &nbsp;·&nbsp; Survive &nbsp;·&nbsp; Conquer</div>
+    <button id="menu-start">Begin Your Chronicle</button>
+  </div>
+  <div id="menu-version">v1.0 &nbsp;·&nbsp; Village Chronicles</div>
+</div>
+
+<!-- HUD -->
+<div id="hud">
+  <div class="hud-left">
+    <div class="hud-item">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+      <span id="hud-date">Year 1 — Jan 1</span>
+    </div>
+    <div class="hud-sep"></div>
+    <div class="hud-item">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/><line x1="12" y1="3" x2="12" y2="7"/><line x1="12" y1="17" x2="12" y2="21"/><line x1="3" y1="12" x2="7" y2="12"/><line x1="17" y1="12" x2="21" y2="12"/></svg>
+      <span id="hud-gold">0</span>
+      <span class="sub" id="hud-gps">(+0/s)</span>
+    </div>
+  </div>
+  <div class="hud-center"></div>
+  <div class="hud-right">
+    <div class="hud-item">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      <span id="hud-pop">0</span>/<span id="hud-cap">0</span>
+    </div>
+    <div class="hud-item">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      <span id="hud-defence">0</span>
+    </div>
+    <div class="hud-item">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>
+      <span id="hud-houses">0</span>
+    </div>
+  </div>
+</div>
+
+<!-- TABS -->
+<nav id="tabs">
+  <button class="tab-btn active" data-tab="map">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="1,6 1,22 8,18 16,22 23,18 23,2 16,6 8,2"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>
+    Map
+  </button>
+  <button class="tab-btn" data-tab="villagers">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+    Villagers
+  </button>
+  <button class="tab-btn" data-tab="defence">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+    Defence
+  </button>
+  <button class="tab-btn" data-tab="attacking">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="19" x2="19" y2="5"/><polyline points="15,5 19,5 19,9"/><line x1="5" y1="9" x2="9" y2="5"/><polyline points="5,15 5,19 9,19"/></svg>
+    Attacking
+  </button>
+  <button class="tab-btn" data-tab="alliance">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+    Alliances
+  </button>
+</nav>
+
+<!-- CONTENT -->
+<div id="content">
+
+  <!-- MAP -->
+  <div id="tab-map" class="tab-pane active">
+    <div id="map-wrap">
+      <canvas id="map-canvas"></canvas>
+      <div id="place-hint">Left-click to place &nbsp;·&nbsp; ESC to cancel</div>
+      <div id="map-controls">
+        <button class="map-btn" id="btn-recenter">Return to Village</button>
+        <button class="map-btn" id="btn-zoom-in">Zoom In</button>
+        <button class="map-btn" id="btn-zoom-out">Zoom Out</button>
+      </div>
+    </div>
+    <div id="map-sidebar">
+      <div class="sidebar-tabs">
+        <button class="sidebar-tab active" data-stab="shop">Shop</button>
+        <button class="sidebar-tab" data-stab="buildings">My Buildings</button>
+      </div>
+      <div id="stab-shop" class="sidebar-panel active">
+        <div class="shop-cats" id="shop-cats"></div>
+        <div id="shop-items"></div>
+      </div>
+      <div id="stab-buildings" class="sidebar-panel">
+        <div id="buildings-list"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- VILLAGERS -->
+  <div id="tab-villagers" class="tab-pane">
+    <div id="v-header">
+      <span id="v-title">Villagers</span>
+      <div id="v-filters">
+        <button class="vf-btn active" data-filter="all">All</button>
+        <button class="vf-btn" data-filter="idle">Idle</button>
+        <button class="vf-btn" data-filter="workers">Workers</button>
+        <button class="vf-btn" data-filter="combat">Combat</button>
+      </div>
+    </div>
+    <div id="v-stats-bar">
+      Population: <b id="vs-total">0</b>/<b id="vs-housed">0</b>
+      &nbsp; Deceased: <b id="vs-deceased">0</b>
+      &nbsp; Combat: <b id="vs-mil">0</b>
+    </div>
+    <div style="display:flex;flex:1;overflow:hidden">
+      <div id="villager-list" style="flex:1;overflow-y:auto"></div>
+      <div id="v-detail-panel" class="hidden">
+        <div class="vd-portrait" id="vd-portrait">
+          <span id="vd-initials">—</span>
+          <span class="vd-status" id="vd-status"></span>
+        </div>
+        <div class="vd-name" id="vd-name">—</div>
+        <div class="vd-job" id="vd-job-label">—</div>
+        <div class="vd-bars">
+          <div class="vd-bar-row"><span class="lbl">Health</span><div class="vd-bar-outer"><div class="vd-bar-inner" id="vdb-hp" style="background:#30a030"></div></div><span class="vd-bar-val" id="vdv-hp">—</span></div>
+          <div class="vd-bar-row"><span class="lbl">Hunger</span><div class="vd-bar-outer"><div class="vd-bar-inner" id="vdb-hunger" style="background:#b07020"></div></div><span class="vd-bar-val" id="vdv-hunger">—</span></div>
+          <div class="vd-bar-row"><span class="lbl">Thirst</span><div class="vd-bar-outer"><div class="vd-bar-inner" id="vdb-thirst" style="background:#2070b0"></div></div><span class="vd-bar-val" id="vdv-thirst">—</span></div>
+        </div>
+        <div class="vd-stats" id="vd-stats"></div>
+        <div class="vd-job-section">
+          <div class="vd-job-label">Assign Job</div>
+          <div class="vd-job-grid" id="vd-job-grid"></div>
+        </div>
+        <button class="vd-close" id="vd-close">Close ✕</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- DEFENCE -->
+  <div id="tab-defence" class="tab-pane">
+    <div class="section-header">
+      <span class="section-title">Village Defence</span>
+      <span style="font-size:12px;color:var(--dim)" id="def-status">No known threats</span>
+    </div>
+    <div class="defence-body">
+      <div class="defence-col">
+        <div class="col-title">Military Strength</div>
+        <div class="col-body"><div class="mil-stats" id="mil-stats"></div></div>
+      </div>
+      <div class="defence-col">
+        <div class="col-title">Impending Attacks</div>
+        <div class="col-body" id="pending-attacks"><div class="empty-state">No known attacks inbound.</div></div>
+      </div>
+      <div class="defence-col">
+        <div class="col-title">Battle Log</div>
+        <div class="col-body" id="battle-log"><div class="empty-state">No battles recorded.</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ATTACKING -->
+  <div id="tab-attacking" class="tab-pane">
+    <div class="section-header">
+      <span class="section-title">Raiding &amp; Conquest</span>
+      <span style="font-size:12px;color:var(--dim)" id="atk-refresh">Targets refresh: 5:00</span>
+    </div>
+    <div class="attacking-body">
+      <div class="attack-left">
+        <div class="col-title">Available Targets</div>
+        <div style="flex:1;overflow-y:auto" id="attack-targets"></div>
+      </div>
+      <div class="attack-right">
+        <div class="col-title">Hostages (<span id="hostage-count">0</span>)</div>
+        <div style="flex:1;overflow-y:auto" id="hostages-list"></div>
+        <div class="col-title">Raid Log</div>
+        <div style="flex:0 0 180px;overflow-y:auto" id="raid-log"><div class="empty-state" style="font-size:11px">No raids yet.</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ALLIANCE -->
+  <div id="tab-alliance" class="tab-pane">
+    <div class="section-header">
+      <span class="section-title">Diplomacy &amp; Alliances</span>
+      <span style="font-size:12px;color:var(--dim)" id="al-refresh">Offers refresh: 5:00</span>
+    </div>
+    <div class="alliance-body">
+      <div class="alliance-left">
+        <div class="col-title">Available for Alliance</div>
+        <div style="flex:1;overflow-y:auto" id="alliance-offers"></div>
+      </div>
+      <div class="alliance-right">
+        <div class="col-title">Active Alliances</div>
+        <div style="flex:1;overflow-y:auto" id="active-alliances"><div class="empty-state" style="font-size:11px">No alliances.</div></div>
+        <div class="col-title">Incoming Requests</div>
+        <div style="flex:0 0 140px;overflow-y:auto" id="alliance-requests"><div class="empty-state" style="font-size:11px">None.</div></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ARRIVAL POPUP -->
+<div id="arrival-popup">
+  <div class="arrival-avatar">
+    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#8a7850" stroke-width="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+  </div>
+  <div class="arrival-info">
+    <div class="arrival-name" id="arr-name">—</div>
+    <div class="arrival-sub" id="arr-sub">—</div>
+    <div class="arrival-stats" id="arr-stats"></div>
+  </div>
+  <div class="arrival-actions">
+    <button class="arr-btn arr-btn-yes" id="arr-yes" title="Accept">✓</button>
+    <button class="arr-btn arr-btn-no" id="arr-no" title="Deny">✕</button>
+  </div>
+</div>
+
+<!-- NOTIFICATION LOG -->
+<div id="notif-log"></div>
+
+<!-- MODAL -->
+<div id="modal-overlay">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title" id="modal-title">—</span>
+      <button class="modal-close" id="modal-close">&#x2715;</button>
+    </div>
+    <div class="modal-body" id="modal-body"></div>
+    <div class="modal-footer" id="modal-footer"></div>
+  </div>
+</div>
+
+<script>
+'use strict';
+// ═══════════════════════════════════════════════════════
+// CATALOG
+// ═══════════════════════════════════════════════════════
+const CATALOG={
+  wheat_farm:{id:'wheat_farm',name:'Wheat Farm',cat:'food',desc:'Grows crops to feed villagers.',baseCost:75,mult:1.15,gps:.8,workers:2,job:'farmer',gw:3,gh:2,col:'#6a5010',brd:'#c09028',ups:[{name:'Potato Farm',cost:250,gpsAdd:.4,desc:'Higher yield potatoes'},{name:'Carrot Farm',cost:700,gpsAdd:.6,desc:'Nutrient-rich carrots'},{name:'Turnip Farm',cost:1800,gpsAdd:1,desc:'Hardy winter crops'},{name:'Herb Garden',cost:5000,gpsAdd:1.8,desc:'Medicinal herbs'},{name:'Orchard',cost:14000,gpsAdd:3,desc:'Fruit trees & berries'}]},
+  windmill:{id:'windmill',name:'Windmill',cat:'production',desc:'Grinds grain into flour.',baseCost:150,mult:1.18,gps:1.2,workers:1,job:'miller',gw:2,gh:3,col:'#5a4a36',brd:'#8a7a56',ups:[{name:'Water Mill',cost:600,gpsAdd:.8,desc:'Water-powered grinding'},{name:'Stone Mill',cost:2000,gpsAdd:1.5,desc:'Greater throughput'},{name:'Great Mill',cost:6000,gpsAdd:3,desc:'Industrial output'}]},
+  cottage:{id:'cottage',name:'Cottage',cat:'housing',desc:'Houses 2 villagers.',baseCost:40,mult:1.10,gps:0,workers:0,job:null,gw:2,gh:2,col:'#4a2e14',brd:'#7a5030',cap:2,ups:[{name:'House',cost:200,capAdd:2,desc:'Holds 4 villagers'},{name:'Manor',cost:800,capAdd:4,desc:'Holds 8 villagers'},{name:'Estate',cost:3000,capAdd:8,desc:'Holds 16 villagers'},{name:'Keep',cost:10000,capAdd:16,desc:'Holds 32 villagers'}]},
+  well:{id:'well',name:'Well',cat:'water',desc:'Provides fresh water.',baseCost:60,mult:1.12,gps:.3,workers:0,job:null,gw:1,gh:1,col:'#1a3050',brd:'#2a5a90',ups:[{name:'Stone Well',cost:300,gpsAdd:.2,desc:'More reliable water'},{name:'Cistern',cost:900,gpsAdd:.5,desc:'Water storage'},{name:'Aqueduct',cost:3000,gpsAdd:1,desc:'Running water'},{name:'Reservoir',cost:8000,gpsAdd:2,desc:'Massive supply'}]},
+  market:{id:'market',name:'Market',cat:'commerce',desc:'Buys and sells goods.',baseCost:200,mult:1.20,gps:1.5,workers:2,job:'merchant',gw:3,gh:2,col:'#3a2010',brd:'#7a4820',ups:[{name:'Bazaar',cost:1000,gpsAdd:1,desc:'More stalls'},{name:'Trading Post',cost:3500,gpsAdd:2,desc:'Long-distance trade'},{name:'Grand Market',cost:10000,gpsAdd:4,desc:'Regional hub'}]},
+  bakery:{id:'bakery',name:'Bakery',cat:'food',desc:'Bakes bread from grain.',baseCost:120,mult:1.16,gps:1,workers:1,job:'baker',gw:2,gh:2,col:'#6a3010',brd:'#b05828',ups:[{name:'Artisan Bakery',cost:600,gpsAdd:.8,desc:'Fine breads'},{name:'Grand Bakery',cost:2000,gpsAdd:1.5,desc:'Large-scale baking'}]},
+  tavern:{id:'tavern',name:'Tavern',cat:'commerce',desc:'Serves food and drink.',baseCost:180,mult:1.18,gps:1.3,workers:2,job:'innkeeper',gw:3,gh:2,col:'#3a1805',brd:'#6a3010',ups:[{name:'Inn',cost:800,gpsAdd:1,desc:'Lodgings available'},{name:'Grand Inn',cost:2500,gpsAdd:2,desc:'Renowned hospitality'},{name:'Palace Inn',cost:8000,gpsAdd:4,desc:'Luxury accommodations'}]},
+  sawmill:{id:'sawmill',name:'Sawmill',cat:'production',desc:'Processes timber.',baseCost:175,mult:1.17,gps:1.1,workers:2,job:'carpenter',gw:3,gh:2,col:'#4a2808',brd:'#8a5028',ups:[{name:'Timber Mill',cost:700,gpsAdd:.8,desc:'Efficient sawing'},{name:'Master Woodworks',cost:2200,gpsAdd:1.5,desc:'Fine woodworking'},{name:'Grand Lumber Yard',cost:7000,gpsAdd:3,desc:'Industrial lumber'}]},
+  stone_quarry:{id:'stone_quarry',name:'Stone Quarry',cat:'production',desc:'Extracts stone.',baseCost:225,mult:1.19,gps:1.3,workers:3,job:'miner',gw:4,gh:3,col:'#383838',brd:'#686868',ups:[{name:'Deep Quarry',cost:1000,gpsAdd:1,desc:'Richer veins'},{name:'Iron Mine',cost:3000,gpsAdd:2,desc:'Iron ore extraction'},{name:'Gold Mine',cost:10000,gpsAdd:5,desc:'Precious metals'}]},
+  blacksmith:{id:'blacksmith',name:'Blacksmith',cat:'production',desc:'Forges metal goods.',baseCost:280,mult:1.20,gps:1.6,workers:1,job:'blacksmith',gw:2,gh:2,col:'#181818',brd:'#484848',ups:[{name:'Armorer',cost:1200,gpsAdd:1.2,desc:'Armor & weapons'},{name:'Master Forge',cost:4000,gpsAdd:2.5,desc:'Masterwork quality'}]},
+  chapel:{id:'chapel',name:'Chapel',cat:'civic',desc:'Boosts morale, reduces disease.',baseCost:300,mult:1.15,gps:.5,workers:1,job:'priest',gw:2,gh:3,col:'#2a1838',brd:'#5a3870',ups:[{name:'Church',cost:1500,gpsAdd:.5,desc:'Larger congregation'},{name:'Abbey',cost:5000,gpsAdd:1,desc:'Monastery & scriptorium'},{name:'Cathedral',cost:15000,gpsAdd:2.5,desc:'Grand cathedral'}]},
+  school:{id:'school',name:'School',cat:'civic',desc:'Educates villagers.',baseCost:350,mult:1.15,gps:.8,workers:1,job:'scholar',gw:3,gh:2,col:'#1a2830',brd:'#2a4860',ups:[{name:'Academy',cost:2000,gpsAdd:.8,desc:'Advanced studies'},{name:'University',cost:8000,gpsAdd:2,desc:'Center of knowledge'}]},
+  stable:{id:'stable',name:'Stable',cat:'military',desc:'Houses warhorses.',baseCost:250,mult:1.18,gps:.6,workers:1,job:'stablehand',gw:3,gh:2,col:'#382008',brd:'#684020',ups:[{name:'War Stables',cost:1200,gpsAdd:.4,desc:'Trained warhorses'},{name:'Royal Stables',cost:4000,gpsAdd:1,desc:'Elite mounts'}]},
+  archery_range:{id:'archery_range',name:'Archery Range',cat:'military',desc:'Trains archers.',baseCost:200,mult:1.20,gps:0,workers:0,job:null,gw:4,gh:2,col:'#2a1808',brd:'#5a3018',ups:[{name:'Advanced Range',cost:1000,desc:'Faster archer leveling'},{name:'Master Range',cost:4000,desc:'Elite archer training'}]},
+  barracks:{id:'barracks',name:'Barracks',cat:'military',desc:'Houses and trains soldiers.',baseCost:300,mult:1.22,gps:0,workers:0,job:null,gw:3,gh:3,col:'#181818',brd:'#383838',ups:[{name:'Training Ground',cost:1500,desc:'Advanced military drills'},{name:'War Academy',cost:6000,desc:'Elite training'}]},
+  watchtower:{id:'watchtower',name:'Watchtower',cat:'military',desc:'Early warning of attacks.',baseCost:175,mult:1.18,gps:0,workers:1,job:'guard',gw:1,gh:2,col:'#302818',brd:'#706040',ups:[{name:'Signal Tower',cost:800,desc:'Extended visibility'},{name:'Fortress Tower',cost:3000,desc:'Armored fortification'}]},
+  wooden_wall:{id:'wooden_wall',name:'Wooden Palisade',cat:'military',desc:'Basic defensive wall.',baseCost:100,mult:1.10,gps:0,workers:0,job:null,gw:4,gh:1,col:'#3a2408',brd:'#7a5428',ups:[{name:'Stone Wall',cost:500,desc:'Sturdier fortification'},{name:'Fortified Wall',cost:2000,desc:'Crenellated battlements'},{name:'Great Wall',cost:8000,desc:'Impenetrable wall'}]},
+  hospital:{id:'hospital',name:'Apothecary',cat:'civic',desc:'Treats illness and wounds.',baseCost:400,mult:1.18,gps:.4,workers:1,job:'doctor',gw:2,gh:2,col:'#182818',brd:'#386838',ups:[{name:'Physician Hall',cost:2000,desc:'Better medical care'},{name:'Hospital',cost:7000,desc:'Full medical facility'}]},
+  granary:{id:'granary',name:'Granary',cat:'food',desc:'Stores grain.',baseCost:130,mult:1.13,gps:.2,workers:1,job:'farmer',gw:2,gh:2,col:'#5a4008',brd:'#9a7828',ups:[{name:'Great Granary',cost:600,gpsAdd:.2,desc:'Larger reserve'},{name:'Storehouse',cost:2000,gpsAdd:.5,desc:'Massive storage'}]},
+  tannery:{id:'tannery',name:'Tannery',cat:'production',desc:'Processes hides.',baseCost:220,mult:1.16,gps:1.2,workers:2,job:'tanner',gw:3,gh:2,col:'#4a1808',brd:'#8a3818',ups:[{name:'Leather Works',cost:900,gpsAdd:.8,desc:'Quality leather'},{name:'Armorer Tannery',cost:3000,gpsAdd:1.5,desc:'Leather armor'}]},
+  weaver:{id:'weaver',name:'Weaver',cat:'production',desc:'Weaves cloth.',baseCost:160,mult:1.15,gps:1,workers:2,job:'weaver',gw:2,gh:2,col:'#381838',brd:'#784878',ups:[{name:'Clothiers',cost:700,gpsAdd:.7,desc:'Fine cloth'},{name:'Textile Mill',cost:2500,gpsAdd:1.5,desc:'Mass production'}]},
+  fishery:{id:'fishery',name:'Fishery',cat:'food',desc:'Catches fish.',baseCost:110,mult:1.14,gps:.9,workers:2,job:'fisherman',gw:2,gh:2,col:'#182838',brd:'#386888',ups:[{name:'Fish Farm',cost:500,gpsAdd:.6,desc:'Cultivated ponds'},{name:'Cannery',cost:2000,gpsAdd:1.2,desc:'Preserved exports'}]},
+  sheep_pen:{id:'sheep_pen',name:'Sheep Pen',cat:'food',desc:'Raises sheep.',baseCost:90,mult:1.14,gps:.7,workers:1,job:'farmer',gw:3,gh:2,col:'#505040',brd:'#909070',ups:[{name:'Cattle Ranch',cost:400,gpsAdd:.5,desc:'Cattle & dairy'},{name:'Animal Estate',cost:1500,gpsAdd:1,desc:'Diverse livestock'}]},
+  training_dummy:{id:'training_dummy',name:'Training Dummy',cat:'military',desc:'Improves combat skill.',baseCost:80,mult:1.12,gps:0,workers:0,job:null,gw:1,gh:1,col:'#281408',brd:'#583418',ups:[{name:'Sparring Post',cost:400,desc:'Better equipment'},{name:'Combat Arena',cost:1500,desc:'Full simulation'}]},
+  armory:{id:'armory',name:'Armory',cat:'military',desc:'Stores weapons & armor.',baseCost:350,mult:1.20,gps:0,workers:1,job:'blacksmith',gw:2,gh:2,col:'#181828',brd:'#383858',ups:[{name:'War Armory',cost:1800,desc:'Better equipped troops'},{name:'Arsenal',cost:6000,desc:'Full supply chain'}]},
+  lighthouse:{id:'lighthouse',name:'Lighthouse',cat:'civic',desc:'Attracts traders & migrants.',baseCost:500,mult:1.18,gps:2,workers:1,job:'merchant',gw:2,gh:3,col:'#202838',brd:'#404868',ups:[{name:'Signal Beacon',cost:2500,gpsAdd:1.5,desc:'Visible for miles'},{name:'Grand Lighthouse',cost:8000,gpsAdd:3,desc:'Regional landmark'}]},
+
+  // ── FOOD (extended) ──
+  pig_sty:{id:'pig_sty',name:'Pig Sty',cat:'food',desc:'Raises pigs for meat and lard.',baseCost:55,mult:1.13,gps:.6,workers:1,job:'farmer',gw:2,gh:2,col:'#4a3828',brd:'#8a6848',ups:[{name:'Hog Farm',cost:300,gpsAdd:.5,desc:'Larger herd, more output'},{name:'Smokehouse',cost:900,gpsAdd:1,desc:'Smoked meats fetch high prices'},{name:'Butchery',cost:2500,gpsAdd:2,desc:'Full meat processing works'}]},
+  vineyard:{id:'vineyard',name:'Vineyard',cat:'food',desc:'Grows grapes. Needs a Farmer.',baseCost:180,mult:1.17,gps:1.1,workers:2,job:'farmer',gw:4,gh:2,col:'#401828',brd:'#804060',ups:[{name:'Winery',cost:800,gpsAdd:1,desc:'Wine sells for good coin'},{name:'Grand Winery',cost:3000,gpsAdd:2.5,desc:'Renowned vintage'},{name:'Distillery',cost:8000,gpsAdd:4.5,desc:'Spirits and liqueurs'}]},
+  apiary:{id:'apiary',name:'Apiary',cat:'food',desc:'Beehives producing honey and wax.',baseCost:45,mult:1.12,gps:.5,workers:1,job:'farmer',gw:1,gh:1,col:'#5a4008',brd:'#c08020',ups:[{name:'Bee Farm',cost:200,gpsAdd:.4,desc:'Expanded hives'},{name:'Grand Apiary',cost:700,gpsAdd:.9,desc:'Royal honey & fine wax'}]},
+  dairy_farm:{id:'dairy_farm',name:'Dairy Farm',cat:'food',desc:'Cows and goats for milk and cheese.',baseCost:120,mult:1.15,gps:.85,workers:2,job:'farmer',gw:3,gh:2,col:'#506040',brd:'#8a9870',ups:[{name:'Cheese Cellar',cost:500,gpsAdd:.6,desc:'Aged cheeses command premium'},{name:'Dairy Works',cost:1500,gpsAdd:1.2,desc:'Butter, cream, and exports'},{name:'Grand Dairy',cost:4500,gpsAdd:2.5,desc:'Regional dairy supplier'}]},
+  mushroom_cave:{id:'mushroom_cave',name:'Mushroom Cave',cat:'food',desc:'Underground fungus cultivation.',baseCost:95,mult:1.14,gps:.7,workers:1,job:'farmer',gw:2,gh:1,col:'#2a2030',brd:'#5a4870',ups:[{name:'Fungal Warren',cost:400,gpsAdd:.5,desc:'Larger underground network'},{name:'Spore Farm',cost:1200,gpsAdd:1.2,desc:'Rare medicinal mushrooms'}]},
+  herb_patch:{id:'herb_patch',name:'Herb Patch',cat:'food',desc:'Small plot of culinary herbs.',baseCost:30,mult:1.10,gps:.3,workers:1,job:'farmer',gw:1,gh:1,col:'#305028',brd:'#609060',ups:[{name:'Medicine Garden',cost:150,gpsAdd:.2,desc:'Healing herbs supplement the doctor'},{name:'Alchemist Garden',cost:600,gpsAdd:.6,desc:'Rare alchemical ingredients'}]},
+
+  // ── PRODUCTION (extended) ──
+  pottery:{id:'pottery',name:'Pottery Workshop',cat:'production',desc:'Crafts clay vessels and tiles.',baseCost:140,mult:1.15,gps:.9,workers:1,job:'craftsman',gw:2,gh:2,col:'#6a3818',brd:'#b06030',ups:[{name:'Kiln Workshop',cost:600,gpsAdd:.8,desc:'Fired ceramics and bricks'},{name:'Porcelain Works',cost:2000,gpsAdd:1.8,desc:'Fine porcelain goods'},{name:'Tile Factory',cost:6000,gpsAdd:3.5,desc:'Decorative tiles for export'}]},
+  glassblower:{id:'glassblower',name:'Glassblower',cat:'production',desc:'Crafts glass goods and window panes.',baseCost:300,mult:1.18,gps:1.8,workers:1,job:'craftsman',gw:2,gh:2,col:'#205060',brd:'#408898',ups:[{name:'Glass Works',cost:1200,gpsAdd:1.5,desc:'Window glass & bottles'},{name:'Crystal Works',cost:4000,gpsAdd:3,desc:'Fine crystal and optics'}]},
+  candle_maker:{id:'candle_maker',name:'Candle Maker',cat:'production',desc:'Makes candles and lamp oil.',baseCost:110,mult:1.14,gps:.8,workers:1,job:'craftsman',gw:2,gh:2,col:'#4a3808',brd:'#8a7028',ups:[{name:'Chandlery',cost:500,gpsAdd:.7,desc:'Fine candles and lanterns'},{name:'Grand Chandlery',cost:1800,gpsAdd:1.5,desc:'Supplies the whole region'}]},
+  rope_works:{id:'rope_works',name:'Rope Works',cat:'production',desc:'Weaves rope, nets, and cordage.',baseCost:115,mult:1.14,gps:.8,workers:2,job:'craftsman',gw:2,gh:2,col:'#503820',brd:'#906848',ups:[{name:'Sailmaker',cost:600,gpsAdd:.7,desc:'Canvas sails for ships'},{name:'Rigging Works',cost:2000,gpsAdd:1.5,desc:'Full maritime rigging'}]},
+  printing_press:{id:'printing_press',name:'Printing Press',cat:'production',desc:'Prints books, maps, and pamphlets.',baseCost:600,mult:1.18,gps:2.2,workers:1,job:'scholar',gw:3,gh:2,col:'#181828',brd:'#383858',ups:[{name:'Publishing House',cost:3000,gpsAdd:2,desc:'Volumes distributed widely'},{name:'Grand Press',cost:9000,gpsAdd:4,desc:'Regional center of knowledge'}]},
+  cartographer:{id:'cartographer',name:"Cartographer's Studio",cat:'production',desc:'Draws maps and charts.',baseCost:400,mult:1.17,gps:1.6,workers:1,job:'scholar',gw:2,gh:2,col:'#202818',brd:'#405838',ups:[{name:'Map Works',cost:1800,gpsAdd:1.5,desc:'Detailed regional maps'},{name:'Grand Atlas',cost:6000,gpsAdd:3,desc:'Sought by kings and merchants'}]},
+
+  // ── MILITARY (extended) ──
+  guard_post:{id:'guard_post',name:'Guard Post',cat:'military',desc:'A small manned guard station.',baseCost:60,mult:1.10,gps:0,workers:1,job:'guard',gw:1,gh:1,col:'#302818',brd:'#605838',ups:[{name:'Fortified Post',cost:350,desc:'Reinforced timber post'},{name:'Stone Garrison',cost:1200,desc:'Permanent stone garrison'}]},
+  moat:{id:'moat',name:'Moat',cat:'military',desc:'A defensive water ditch.',baseCost:180,mult:1.10,gps:0,workers:0,job:null,gw:5,gh:1,col:'#102030',brd:'#205070',ups:[{name:'Deep Moat',cost:700,desc:'Difficult for enemies to cross'},{name:'Fortified Moat',cost:2500,desc:'Sharpened stakes and traps'}]},
+  siege_workshop:{id:'siege_workshop',name:'Siege Workshop',cat:'military',desc:'Builds siege weapons and engines.',baseCost:500,mult:1.22,gps:0,workers:2,job:'carpenter',gw:3,gh:2,col:'#281808',brd:'#584030',ups:[{name:'Catapult Works',cost:2000,desc:'Stone-throwing catapults'},{name:'Trebuchet Works',cost:7000,desc:'Devastating heavy trebuchets'}]},
+  spy_post:{id:'spy_post',name:'Spy Post',cat:'military',desc:'Gathers intelligence on threats.',baseCost:350,mult:1.18,gps:0,workers:1,job:'scholar',gw:2,gh:2,col:'#181818',brd:'#383838',ups:[{name:'Intelligence Network',cost:1500,desc:'Early warning of all attacks'},{name:'Secret Service',cost:5000,desc:'Sabotage enemy raids'}]},
+  gate_tower:{id:'gate_tower',name:'Gate Tower',cat:'military',desc:'A fortified village gate.',baseCost:320,mult:1.15,gps:0,workers:1,job:'guard',gw:2,gh:3,col:'#282018',brd:'#585038',ups:[{name:'Iron Gate',cost:1200,desc:'Heavy iron portcullis'},{name:'Fortress Gate',cost:4000,desc:'Impenetrable gateway fortress'}]},
+
+  // ── COMMERCE (extended) ──
+  jeweler:{id:'jeweler',name:"Jeweler's Shop",cat:'commerce',desc:'Crafts fine jewelry and ornaments.',baseCost:320,mult:1.20,gps:2,workers:1,job:'craftsman',gw:2,gh:2,col:'#301808',brd:'#705030',ups:[{name:'Goldsmith',cost:1400,gpsAdd:1.5,desc:'Gold and silver works'},{name:'Royal Jeweler',cost:5000,gpsAdd:3,desc:'Sought by nobility'}]},
+  guild_hall:{id:'guild_hall',name:'Guild Hall',cat:'commerce',desc:'Organizes the trade guilds.',baseCost:550,mult:1.18,gps:1.8,workers:2,job:'merchant',gw:3,gh:2,col:'#3a2010',brd:'#7a5030',ups:[{name:'Trade Guild',cost:2500,gpsAdd:2,desc:'Regulated commerce'},{name:'Grand Guild',cost:8000,gpsAdd:4,desc:'Dominates regional trade'}]},
+  harbor:{id:'harbor',name:'Harbor',cat:'commerce',desc:'Docks for trading vessels.',baseCost:700,mult:1.22,gps:3,workers:3,job:'merchant',gw:4,gh:2,col:'#182030',brd:'#304870',ups:[{name:'Trading Port',cost:3000,gpsAdd:2.5,desc:'Long-range trade routes'},{name:'Grand Harbor',cost:10000,gpsAdd:5,desc:'Busiest port in the region'}]},
+  money_changer:{id:'money_changer',name:'Money Changer',cat:'commerce',desc:'Exchanges currency and extends loans.',baseCost:500,mult:1.20,gps:2.5,workers:1,job:'merchant',gw:2,gh:2,col:'#302008',brd:'#706028',ups:[{name:'Banking House',cost:2500,gpsAdd:2,desc:'Interest-bearing accounts'},{name:'Treasury',cost:9000,gpsAdd:5,desc:'Controls regional wealth'}]},
+  herbalist:{id:'herbalist',name:'Herbalist Shop',cat:'commerce',desc:'Sells medicinal herbs and remedies.',baseCost:160,mult:1.15,gps:1.1,workers:1,job:'doctor',gw:2,gh:2,col:'#183018',brd:'#306830',ups:[{name:'Apothecary',cost:700,gpsAdd:.9,desc:'Potions and remedies'},{name:'Alchemist',cost:2500,gpsAdd:2,desc:'Alchemical wonders for sale'}]},
+
+  // ── CIVIC (extended) ──
+  bathhouse:{id:'bathhouse',name:'Bathhouse',cat:'civic',desc:'Public baths boost health and morale.',baseCost:280,mult:1.15,gps:.6,workers:1,job:'craftsman',gw:3,gh:2,col:'#182030',brd:'#305870',ups:[{name:'Roman Baths',cost:1500,gpsAdd:.8,desc:'Heated steam baths'},{name:'Grand Baths',cost:5000,gpsAdd:1.8,desc:'Luxury bathing complex'}]},
+  town_square:{id:'town_square',name:'Town Square',cat:'civic',desc:'A public gathering place.',baseCost:220,mult:1.12,gps:.5,workers:0,job:null,gw:4,gh:4,col:'#302810',brd:'#605830',ups:[{name:'Marketplace Square',cost:1000,gpsAdd:.5,desc:'Weekly market draws crowds'},{name:'Grand Plaza',cost:4000,gpsAdd:1.2,desc:'Fountain and cobblestones'}]},
+  observatory:{id:'observatory',name:'Observatory',cat:'civic',desc:'Studies the stars and seasons.',baseCost:700,mult:1.18,gps:1,workers:1,job:'scholar',gw:2,gh:3,col:'#181828',brd:'#384868',ups:[{name:'Astronomy Tower',cost:3000,gpsAdd:1,desc:'Navigation charts and almanacs'},{name:'Grand Observatory',cost:10000,gpsAdd:2.5,desc:'Centre of scientific thought'}]},
+  theater:{id:'theater',name:'Theater',cat:'civic',desc:'Performances boost morale.',baseCost:380,mult:1.16,gps:.8,workers:2,job:'innkeeper',gw:4,gh:3,col:'#2a1838',brd:'#5a3870',ups:[{name:'Grand Theater',cost:2000,gpsAdd:1,desc:'Famous plays and concerts'},{name:'Opera House',cost:7000,gpsAdd:2.5,desc:'Crown jewel of the village'}]},
+  courthouse:{id:'courthouse',name:'Courthouse',cat:'civic',desc:'Resolves disputes, maintains order.',baseCost:420,mult:1.16,gps:.7,workers:1,job:'scholar',gw:3,gh:2,col:'#201818',brd:'#483838',ups:[{name:'Town Hall',cost:2000,gpsAdd:.7,desc:'Village administration'},{name:'City Hall',cost:7000,gpsAdd:1.8,desc:'Full civic administration'}]},
+  orphanage:{id:'orphanage',name:'Orphanage',cat:'civic',desc:'Houses orphaned children who grow into villagers.',baseCost:200,mult:1.12,gps:.2,workers:1,job:'doctor',gw:2,gh:2,col:'#182818',brd:'#385838',ups:[{name:'Children\'s Home',cost:1000,gpsAdd:.2,desc:'Better care, faster growth'},{name:'Youth Academy',cost:3500,gpsAdd:.5,desc:'Education and training'}]},
+  fountain:{id:'fountain',name:'Fountain',cat:'civic',desc:'A decorative fountain boosting water supply.',baseCost:150,mult:1.12,gps:.3,workers:0,job:null,gw:2,gh:2,col:'#182838',brd:'#386888',ups:[{name:'Grand Fountain',cost:700,gpsAdd:.4,desc:'Beautiful stone fountain'},{name:'Water Monument',cost:2500,gpsAdd:.8,desc:'Village landmark'}]},
+
+  // ── HOUSING (extended) ──
+  longhouse:{id:'longhouse',name:'Longhouse',cat:'housing',desc:'Houses 6 villagers in a long hall.',baseCost:80,mult:1.12,gps:0,workers:0,job:null,gw:4,gh:2,col:'#3a2810',brd:'#7a5830',cap:6,ups:[{name:'Great Hall',cost:400,capAdd:4,desc:'Holds 10 villagers'},{name:'Grand Hall',cost:1500,capAdd:8,desc:'Holds 18 villagers'},{name:'Mead Hall',cost:5000,capAdd:12,desc:'Holds 30 villagers'}]},
+  dormitory:{id:'dormitory',name:'Dormitory',cat:'housing',desc:'Simple shared sleeping quarters for 8.',baseCost:100,mult:1.12,gps:0,workers:0,job:null,gw:3,gh:2,col:'#2a2018',brd:'#5a4838',cap:8,ups:[{name:'Barracks Dorm',cost:500,capAdd:6,desc:'Holds 14'},{name:'Grand Dormitory',cost:1800,capAdd:10,desc:'Holds 24'}]},
+  noble_house:{id:'noble_house',name:'Noble House',cat:'housing',desc:'Prestigious housing attracts skilled migrants.',baseCost:800,mult:1.20,gps:.5,workers:0,job:null,gw:3,gh:3,col:'#3a2808',brd:'#c8a84b',cap:4,ups:[{name:'Mansion',cost:3000,capAdd:4,gpsAdd:.5,desc:'Holds 8, attracts wealthy'},{name:'Palace Wing',cost:10000,capAdd:8,gpsAdd:1.5,desc:'Holds 16, very prestigious'}]},
+
+  // ── WATER (extended) ──
+  irrigation:{id:'irrigation',name:'Irrigation Channel',cat:'water',desc:'Channels water directly to farms.',baseCost:90,mult:1.12,gps:.4,workers:0,job:null,gw:4,gh:1,col:'#182030',brd:'#305870',ups:[{name:'Irrigation Network',cost:450,gpsAdd:.4,desc:'Entire farm network watered'},{name:'Grand Canal',cost:1800,gpsAdd:1,desc:'Connects all fields and ponds'}]},
+  pond:{id:'pond',name:'Pond',cat:'water',desc:'A small freshwater pond.',baseCost:70,mult:1.11,gps:.35,workers:0,job:null,gw:2,gh:2,col:'#182030',brd:'#305878',ups:[{name:'Fish Pond',cost:350,gpsAdd:.4,desc:'Stocked with fish'},{name:'Lake',cost:1200,gpsAdd:1,desc:'Large freshwater lake'}]},
+  water_tower:{id:'water_tower',name:'Water Tower',cat:'water',desc:'Elevated tank for water pressure.',baseCost:340,mult:1.15,gps:.8,workers:0,job:null,gw:2,gh:3,col:'#202838',brd:'#405868',ups:[{name:'Grand Water Tower',cost:1600,gpsAdd:.8,desc:'Serves the entire village'},{name:'Aqueduct System',cost:6000,gpsAdd:2,desc:'Roman-style water delivery'}]},
+};
+
+const CATS={food:'Food',production:'Production',housing:'Housing',commerce:'Commerce',military:'Military',civic:'Civic',water:'Water'};
+
+const JOBS={
+  idle:{name:'Idle',desc:'No job assigned',free:true,mil:false},
+  farmer:{name:'Farmer',desc:'Works farms & fields',free:true,mil:false},
+  miller:{name:'Miller',desc:'Operates mills',free:true,mil:false},
+  baker:{name:'Baker',desc:'Bakes bread',free:true,mil:false},
+  merchant:{name:'Merchant',desc:'Trades at markets',free:true,mil:false},
+  carpenter:{name:'Carpenter',desc:'Works the sawmill',free:true,mil:false},
+  miner:{name:'Miner',desc:'Works quarries',free:true,mil:false},
+  blacksmith:{name:'Blacksmith',desc:'Operates the forge',free:true,mil:false},
+  innkeeper:{name:'Innkeeper',desc:'Runs the tavern',free:true,mil:false},
+  fisherman:{name:'Fisherman',desc:'Fishes nearby waters',free:true,mil:false},
+  weaver:{name:'Weaver',desc:'Weaves cloth',free:true,mil:false},
+  tanner:{name:'Tanner',desc:'Works leather',free:true,mil:false},
+  stablehand:{name:'Stablehand',desc:'Tends the stables',free:true,mil:false},
+  scholar:{name:'Scholar',desc:'Studies & teaches',free:true,mil:false},
+  priest:{name:'Priest',desc:'Serves at the chapel',free:true,mil:false},
+  doctor:{name:'Doctor',desc:'Heals the sick',free:true,mil:false},
+  guard:{name:'Guard',desc:'Patrols (2g/day)',free:false,cost:2,mil:true},
+  archer:{name:'Archer',desc:'Ranged unit (4g/day)',free:false,cost:4,mil:true},
+  soldier:{name:'Soldier',desc:'Melee unit (5g/day)',free:false,cost:5,mil:true},
+  knight:{name:'Knight',desc:'Elite unit (12g/day)',free:false,cost:12,mil:true},
+  craftsman:{name:'Craftsman',desc:'Works pottery, glass, rope, candles',free:true,mil:false},
+};
+
+// ═══════════════════════════════════════════════════════
+// NAMES
+// ═══════════════════════════════════════════════════════
+const MNAMES=['Aldric','Bertram','Cedric','Edmund','Godfrey','Harold','Ingram','Jasper','Kenric','Leofric','Milo','Norman','Oswald','Percy','Quentin','Roland','Siegfried','Thorold','Ulric','Wulfric','Aelfric','Baldwin','Conrad','Dunstan','Egbert','Fulk','Gerard','Hamo','Falk','Jordan','Kenelm','Lambert'];
+const FNAMES=['Agatha','Beatrice','Constance','Dorothy','Eleanor','Florinda','Gwyneth','Helena','Isolde','Juliana','Katherine','Lavinia','Mabel','Nellie','Petronilla','Rowena','Sibyl','Thomasina','Ursula','Alditha','Cecily','Denise','Edith','Felicia','Godiva','Hawise','Liora','Joan','Agnes','Philippa','Rose','Matilda'];
+const SURNAMES=['Smith','Miller','Baker','Cooper','Fletcher','Mason','Turner','Fisher','Hunter','Thatcher','Ward','Webb','Weaver','Tanner','Farmer','Shepherd','Wright','Clark','Cook','Taylor','Archer','Stone','Ford','Brook','Hill','Longbottom','Whitfield','Elderwood','Blackwood','Pennsworth'];
+const VNAMES=['Ashford','Bridgehaven','Crowmere','Dunmoor','Elmgate','Foxhollow','Greystone','Harrowfield','Ironspark','Kettlecroft','Larchwood','Millhaven','Nighthollow','Oldwick','Pinecrest','Quarryham','Ravenscar','Stonehearth','Thornwall','Zephyrcroft','Blackmoor','Coldwater','Duskfall','Emberglen','Frostmere'];
+
+function rndName(male){const a=male?MNAMES:FNAMES;return a[r(a.length)]+' '+SURNAMES[r(SURNAMES.length)];}
+function rndVName(){return VNAMES[r(VNAMES.length)]+' '+(r(2)?'Village':'Settlement');}
+function r(n){return Math.floor(Math.random()*n);}
+function rnd(a,b){return a+Math.random()*(b-a);}
+
+// ═══════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════
+const AVATAR_COLS=['#c8a040','#b8903a','#d0a848','#a87830','#c09040','#b88838'];
+let G={
+  gold:300,gps:0,
+  year:1,day:1,dayMs:0,
+  villagerId:1,buildingId:1,
+  villagers:[],buildings:[],buildingCounts:{},
+  worldVillages:[],attackTargets:[],allianceOffers:[],
+  alliances:[],hostages:[],pendingAttacks:[],battleLog:[],raidLog:[],
+  arrivals:[],
+  hasMilitary:false,gameOver:false,
+  deceasedCount:0,
+  refreshTimer:300000,alRefreshTimer:300000,
+  refreshLabel:'5:00',alLabel:'5:00',
+  map:{ox:0,oy:0,scale:1,drag:false,dx:0,dy:0,dox:0,doy:0,mouseX:0,mouseY:0},
+  placing:null,shopCat:'food',
+  vFilter:'all',
+  expandedVillager:null,
+};
+
+// ═══════════════════════════════════════════════════════
+// WORLD
+// ═══════════════════════════════════════════════════════
+function genWorld(){
+  G.worldVillages=[];
+  for(let i=0;i<80;i++){
+    const tier=r(5);
+    G.worldVillages.push({id:i,name:rndVName(),pop:10+r(50)+tier*20,wealth:tier+rnd(.5,3),tier,battlesWon:r(5+tier*2),x:(r(2)?1:-1)*rnd(800,3000),y:(r(2)?1:-1)*rnd(800,3000),hostile:false,allianceWith:false,defeated:false});
+  }
+}
+function refreshTargets(){
+  const pool=G.worldVillages.filter(v=>!v.allianceWith&&!v.defeated);
+  G.attackTargets=[];const used=new Set();
+  while(G.attackTargets.length<10&&G.attackTargets.length<pool.length){const v=pool[r(pool.length)];if(!used.has(v.id)){used.add(v.id);G.attackTargets.push(v);}}
+}
+function refreshAllianceOffers(){
+  const pool=G.worldVillages.filter(v=>!v.allianceWith&&!G.alliances.find(a=>a.vid===v.id)&&!v.defeated);
+  G.allianceOffers=[];const used=new Set();
+  while(G.allianceOffers.length<10&&G.allianceOffers.length<pool.length){const v=pool[r(pool.length)];if(!used.has(v.id)){used.add(v.id);G.allianceOffers.push(v);}}
+}
+
+// ═══════════════════════════════════════════════════════
+// VILLAGERS
+// ═══════════════════════════════════════════════════════
+function mkVillager(opts={}){
+  const male=opts.male!==undefined?opts.male:r(2)===0;
+  return{id:G.villagerId++,name:rndName(male),male,age:opts.age||Math.floor(rnd(18,42)),ageMs:0,job:'idle',hp:100,hunger:100,thirst:100,str:1+r(5),agi:1+r(5),intel:1+r(5),combatXp:0,combatLevel:1,alive:true,dead_cause:null,diseased:false,diseaseTimer:0,avatarCol:AVATAR_COLS[r(AVATAR_COLS.length)]};
+}
+function kill(v,cause){
+  if(!v.alive)return;v.alive=false;v.job='idle';v.dead_cause=cause;G.deceasedCount++;
+  notify(`${v.name} has died — ${cause}.`,'danger');
+  if(activeTab==='villagers')renderVillagersTab();
+}
+function getInitials(v){const p=v.name.split(' ');return p[0][0]+(p[1]?p[1][0]:'');}
+function living(){return G.villagers.filter(v=>v.alive);}
+function milCount(){return G.villagers.filter(v=>v.alive&&JOBS[v.job]?.mil).length;}
+
+// ═══════════════════════════════════════════════════════
+// ECONOMY
+// ═══════════════════════════════════════════════════════
+function bldCost(id){const c=CATALOG[id];return Math.floor(c.baseCost*Math.pow(c.mult,G.buildingCounts[id]||0));}
+function calcGPS(){
+  let gps=0;
+  const jc={};for(const v of G.villagers)if(v.alive)jc[v.job]=(jc[v.job]||0)+1;
+  for(const b of G.buildings){
+    const c=CATALOG[b.typeId];let g=c.gps;
+    for(let u=1;u<=b.upLevel;u++)if(c.ups[u-1]?.gpsAdd)g+=c.ups[u-1].gpsAdd;
+    if(c.workers===0)gps+=g;
+    else{const a=Math.min(c.workers,jc[c.job]||0);if(a>0)gps+=g*(a/c.workers);}
+  }
+  gps+=living().length*.05;
+  for(const v of G.villagers)if(v.alive&&!JOBS[v.job].free)gps-=(JOBS[v.job].cost||0)/100;
+  G.gps=Math.max(-50,gps);return G.gps;
+}
+function housingCap(){
+  const housingIds=['cottage','longhouse','dormitory','noble_house'];
+  let c=0;
+  for(const b of G.buildings){
+    if(!housingIds.includes(b.typeId))continue;
+    const cat=CATALOG[b.typeId];let cap=cat.cap||0;
+    for(let u=1;u<=b.upLevel;u++)cap+=(cat.ups[u-1]?.capAdd||0);
+    c+=cap;
+  }
+  return c;
+}
+
+// ═══════════════════════════════════════════════════════
+// BUILDINGS
+// ═══════════════════════════════════════════════════════
+function canPlace(id,gx,gy){
+  const c=CATALOG[id];
+  for(const b of G.buildings){const bc=CATALOG[b.typeId];if(gx<b.gx+bc.gw&&gx+c.gw>b.gx&&gy<b.gy+bc.gh&&gy+c.gh>b.gy)return false;}
+  return true;
+}
+function placeBuilding(id,gx,gy){
+  const cost=bldCost(id);if(G.gold<cost)return false;
+  G.gold-=cost;G.buildingCounts[id]=(G.buildingCounts[id]||0)+1;
+  G.buildings.push({id:G.buildingId++,typeId:id,gx,gy,upLevel:0});
+  calcGPS();renderBuildingsList();renderHUD();return true;
+}
+function upgradeBuilding(bid){
+  const b=G.buildings.find(x=>x.id===bid);if(!b)return;
+  const c=CATALOG[b.typeId];const up=c.ups[b.upLevel];if(!up)return;
+  if(G.gold<up.cost)return notify('Not enough gold.','warn');
+  G.gold-=up.cost;b.upLevel++;
+  calcGPS();renderBuildingsList();renderHUD();
+  notify(`${c.name} upgraded to ${up.name}!`,'success');
+}
+const CRAFTSMAN_BUILDINGS=['pottery','glassblower','candle_maker','rope_works','bathhouse','jeweler'];
+function hasBuilding(jobId){
+  const req={guard:'watchtower',archer:'archery_range',soldier:'barracks',knight:'stable'};
+  if(jobId==='craftsman') return G.buildings.some(b=>CRAFTSMAN_BUILDINGS.includes(b.typeId));
+  if(!req[jobId])return true;
+  return G.buildings.some(b=>b.typeId===req[jobId]);
+}
+
+// ═══════════════════════════════════════════════════════
+// MAP
+// ═══════════════════════════════════════════════════════
+const GRID=64;
+function wToC(wx,wy){const cv=document.getElementById('map-canvas');return{x:cv.width/2+(wx-G.map.ox)*G.map.scale,y:cv.height/2+(wy-G.map.oy)*G.map.scale};}
+function cToW(cx,cy){const cv=document.getElementById('map-canvas');return{x:(cx-cv.width/2)/G.map.scale+G.map.ox,y:(cy-cv.height/2)/G.map.scale+G.map.oy};}
+function snapGrid(wx,wy){return{gx:Math.floor(wx/GRID),gy:Math.floor(wy/GRID)};}
+
+// Draw menu background: starry sky + layered mountain silhouettes
+function drawDunes(ctx,W,H,seed){
+  const s=seed||0;
+  // Deep sky gradient
+  const sky=ctx.createLinearGradient(0,0,0,H);
+  sky.addColorStop(0,'#04030a');sky.addColorStop(.45,'#080610');sky.addColorStop(.75,'#0c0806');sky.addColorStop(1,'#181008');
+  ctx.fillStyle=sky;ctx.fillRect(0,0,W,H);
+  // Stars
+  ctx.save();
+  for(let i=0;i<180;i++){
+    const sx=((i*127+s*3)%W+W)%W;const sy=((i*89+s)%(H*.5)+H*.02);
+    const sz=.4+((i*31)%8)*.12;const sa=.25+((i*17)%12)*.04;
+    ctx.fillStyle=`rgba(230,215,180,${sa})`;ctx.beginPath();ctx.arc(sx,sy,sz,0,Math.PI*2);ctx.fill();
+  }
+  ctx.restore();
+  // Moon
+  ctx.save();ctx.fillStyle='rgba(220,200,150,.12)';ctx.beginPath();ctx.arc(W*.78,H*.12,H*.055,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='rgba(220,200,150,.06)';ctx.beginPath();ctx.arc(W*.78,H*.12,H*.08,0,Math.PI*2);ctx.fill();ctx.restore();
+  // Mountain layers
+  function mtn(col,yFrac,a1,a2,f1,f2,p1,p2){
+    ctx.fillStyle=col;ctx.beginPath();ctx.moveTo(-10,H+10);
+    for(let x=-10;x<=W+10;x+=3){
+      const y=H*yFrac+Math.sin(x*f1+p1)*H*a1+Math.sin(x*f2+p2)*H*a2+Math.sin(x*f1*.4+p1+1)*H*a1*.25;
+      ctx.lineTo(x,y);
+    }
+    ctx.lineTo(W+10,H+10);ctx.closePath();ctx.fill();
+  }
+  mtn('#0c0a10',.38,.07,.04,.003,.007,1.2+s*.01,2.8);
+  mtn('#100d0c',.46,.06,.035,.0042,.009,.5,1.9);
+  mtn('#140f0a',.54,.055,.03,.005,.011,2.1,0.8);
+  mtn('#191008',.62,.05,.03,.006,.013,3.3,2.3);
+  mtn('#1e1209',.70,.04,.025,.008,.015,1.6,3.0);
+  mtn('#211408',.78,.035,.02,.01,.018,0.9,1.4);
+  ctx.fillStyle='#1c1208';ctx.fillRect(0,H*.84,W,H*.2);
+}
+
+// Seeded simple hash for repeatable noise
+function hash(x,y){let h=(x*374761393+y*668265263)^((x*668265263)>>5);h^=h>>15;h*=2246822519;h^=h>>13;h*=3266489917;return(h^(h>>16))>>>0;}
+function noiseVal(x,y){return(hash(x,y)%1000)/1000;}
+
+function renderMap(){
+  const cv=document.getElementById('map-canvas');if(!cv)return;
+  const ctx=cv.getContext('2d');const W=cv.width,H=cv.height;
+
+  // ── Dark top-down desert base ──
+  ctx.fillStyle='#0e0b06';ctx.fillRect(0,0,W,H);
+
+  // Scrolling sand texture: tile-based noise patches (anchored to canvas top-left)
+  const tileSize=80;
+  const camLeft=G.map.ox-W/(2*G.map.scale);
+  const camTop=G.map.oy-H/(2*G.map.scale);
+  const ofx=Math.floor(camLeft/tileSize)*tileSize;
+  const ofy=Math.floor(camTop/tileSize)*tileSize;
+  const cols=['rgba(28,20,10,.9)','rgba(22,16,8,.85)','rgba(32,24,12,.8)','rgba(18,14,7,.9)','rgba(26,18,9,.85)'];
+  ctx.save();
+  for(let wx=ofx;wx<camLeft+W/G.map.scale+tileSize;wx+=tileSize){
+    for(let wy=ofy;wy<camTop+H/G.map.scale+tileSize;wy+=tileSize){
+      const p=wToC(wx,wy);const ps=tileSize*G.map.scale;
+      const nx=((Math.floor(wx/tileSize)%256)+256)%256;
+      const ny=((Math.floor(wy/tileSize)%256)+256)%256;
+      const n=noiseVal(nx,ny);
+      ctx.fillStyle=cols[Math.floor(n*cols.length)];
+      ctx.fillRect(p.x,p.y,ps+1,ps+1);
+    }
+  }
+  ctx.restore();
+
+  // Scattered rock formations (world-seeded, scroll with map)
+  ctx.save();
+  for(let i=0;i<120;i++){
+    const rx=(((i*173+71)%600)-300)*GRID*.4;
+    const ry=(((i*251+97)%600)-300)*GRID*.4;
+    const p=wToC(rx,ry);
+    if(p.x<-60||p.x>W+60||p.y<-60||p.y>H+60)continue;
+    const sz=((i*37)%8+3)*G.map.scale;
+    const alpha=.18+((i*13)%10)*.02;
+    ctx.fillStyle=`rgba(10,8,4,${alpha})`;
+    ctx.beginPath();ctx.ellipse(p.x,p.y,sz*1.6,sz,((i*29)%6)*.5,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle=`rgba(40,30,15,${alpha*.5})`;
+    ctx.beginPath();ctx.ellipse(p.x-sz*.3,p.y-sz*.2,sz*.8,sz*.5,0,0,Math.PI*2);ctx.fill();
+  }
+  ctx.restore();
+
+  // Vignette edges
+  const vign=ctx.createRadialGradient(W/2,H/2,Math.min(W,H)*.3,W/2,H/2,Math.max(W,H)*.75);
+  vign.addColorStop(0,'rgba(0,0,0,0)');vign.addColorStop(1,'rgba(0,0,0,.55)');
+  ctx.fillStyle=vign;ctx.fillRect(0,0,W,H);
+
+  // Village area warm glow
+  const vc=wToC(0,0);const vr=GRID*14*G.map.scale;
+  const vg=ctx.createRadialGradient(vc.x,vc.y,0,vc.x,vc.y,vr);
+  vg.addColorStop(0,'rgba(200,155,50,.13)');vg.addColorStop(.6,'rgba(160,120,40,.05)');vg.addColorStop(1,'rgba(0,0,0,0)');
+  ctx.fillStyle=vg;ctx.fillRect(0,0,W,H);
+
+  // Grid
+  const gs=GRID*G.map.scale;
+  const sx=((-(G.map.ox%GRID)*G.map.scale)+W/2)%gs;
+  const sy=((-(G.map.oy%GRID)*G.map.scale)+H/2)%gs;
+  ctx.strokeStyle='rgba(180,140,50,.07)';ctx.lineWidth=.5;
+  for(let x=sx;x<W+gs;x+=gs){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke();}
+  for(let y=sy;y<H+gs;y+=gs){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();}
+
+  // Village center marker
+  ctx.save();ctx.strokeStyle='rgba(200,168,75,.45)';ctx.lineWidth=Math.max(.5,G.map.scale);ctx.setLineDash([4,4]);
+  ctx.beginPath();ctx.arc(vc.x,vc.y,GRID*G.map.scale,0,Math.PI*2);ctx.stroke();ctx.setLineDash([]);
+  ctx.fillStyle='rgba(200,168,75,.9)';ctx.beginPath();ctx.arc(vc.x,vc.y,3,0,Math.PI*2);ctx.fill();ctx.restore();
+
+  // Buildings
+  for(const b of G.buildings){
+    const c=CATALOG[b.typeId];const p=wToC(b.gx*GRID,b.gy*GRID);
+    const sw=c.gw*GRID*G.map.scale,sh=c.gh*GRID*G.map.scale;
+    ctx.save();
+    ctx.shadowColor='rgba(0,0,0,.8)';ctx.shadowBlur=6*G.map.scale;ctx.shadowOffsetY=3*G.map.scale;
+    ctx.fillStyle=c.col;ctx.fillRect(p.x,p.y,sw,sh);ctx.shadowColor='transparent';
+    ctx.strokeStyle=c.brd;ctx.lineWidth=Math.max(1,1.5*G.map.scale);ctx.strokeRect(p.x+.5,p.y+.5,sw-1,sh-1);
+    // Highlight top edge
+    ctx.fillStyle='rgba(255,255,255,.07)';ctx.fillRect(p.x,p.y,sw,sh*.25);
+    const upName=b.upLevel>0&&c.ups[b.upLevel-1]?c.ups[b.upLevel-1].name:c.name;
+    const fs=Math.max(8,Math.min(13,10*G.map.scale));
+    ctx.font=`600 ${fs}px 'Cinzel',serif`;ctx.fillStyle='rgba(255,255,255,.92)';ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillText(upName.length>14?upName.slice(0,12)+'…':upName,p.x+sw/2,p.y+sh/2);ctx.restore();
+  }
+
+  // Placement ghost
+  if(G.placing){
+    const c=CATALOG[G.placing];const w=cToW(G.map.mouseX,G.map.mouseY);const sg=snapGrid(w.x,w.y);
+    const p=wToC(sg.gx*GRID,sg.gy*GRID);const sw=c.gw*GRID*G.map.scale,sh=c.gh*GRID*G.map.scale;
+    const ok=canPlace(G.placing,sg.gx,sg.gy)&&G.gold>=bldCost(G.placing);
+    ctx.save();ctx.globalAlpha=.55;
+    ctx.fillStyle=ok?c.col:'#6a1010';ctx.strokeStyle=ok?c.brd:'#b02020';
+    ctx.lineWidth=Math.max(1,2*G.map.scale);ctx.fillRect(p.x,p.y,sw,sh);ctx.strokeRect(p.x,p.y,sw,sh);
+    ctx.globalAlpha=1;ctx.restore();
+  }
+
+  // World village territories (large boxes, like enemy territory)
+  for(const v of G.worldVillages){
+    const sz=(5+v.tier)*GRID;const sw=sz*G.map.scale;const sh=(4+v.tier)*GRID*G.map.scale;
+    const p=wToC(v.x,v.y);
+    if(p.x+sw<-40||p.x>W+40||p.y+sh<-40||p.y>H+40)continue;
+    ctx.save();
+    const fillCol=v.allianceWith?'rgba(20,50,20,.7)':(v.hostile?'rgba(80,8,8,.75)':'rgba(60,10,10,.7)');
+    const brdCol=v.allianceWith?'#305a30':(v.hostile?'#c02020':'#8a1818');
+    ctx.shadowColor='rgba(0,0,0,.8)';ctx.shadowBlur=8*G.map.scale;ctx.shadowOffsetY=3*G.map.scale;
+    ctx.fillStyle=fillCol;ctx.fillRect(p.x,p.y,sw,sh);
+    ctx.shadowColor='transparent';
+    ctx.strokeStyle=brdCol;ctx.lineWidth=Math.max(1.5,2*G.map.scale);
+    ctx.strokeRect(p.x+.5,p.y+.5,sw-1,sh-1);
+    // Tint highlight
+    ctx.fillStyle=v.allianceWith?'rgba(150,255,150,.04)':'rgba(255,80,80,.05)';
+    ctx.fillRect(p.x,p.y,sw,sh*.25);
+    // Name label
+    const fs=Math.max(8,Math.min(14,11*G.map.scale));
+    ctx.font=`600 ${fs}px 'Cinzel',serif`;
+    ctx.fillStyle=v.allianceWith?'rgba(120,220,120,.92)':(v.hostile?'rgba(255,120,120,.95)':'rgba(220,100,100,.9)');
+    ctx.textAlign='center';ctx.textBaseline='middle';
+    const lbl=v.name;
+    ctx.fillText(lbl.length>16?lbl.slice(0,14)+'…':lbl,p.x+sw/2,p.y+sh/2-fs*.5);
+    ctx.font=`${Math.max(7,Math.min(10,8*G.map.scale))}px 'Crimson Text',serif`;
+    ctx.fillStyle='rgba(200,140,140,.7)';
+    ctx.fillText(`Pop: ${v.pop} · Tier ${v.tier+1}`,p.x+sw/2,p.y+sh/2+fs*.6);
+    ctx.restore();
+  }
+}
+function resizeCanvas(){
+  const cv=document.getElementById('map-canvas');const wrap=document.getElementById('map-wrap');
+  if(!wrap)return;cv.width=wrap.clientWidth;cv.height=wrap.clientHeight;renderMap();
+}
+
+// ═══════════════════════════════════════════════════════
+// DATE
+// ═══════════════════════════════════════════════════════
+const MONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const MDAYS=[31,28,31,30,31,30,31,31,30,31,30,31];
+function gameDate(){
+  const dayOfYear=Math.floor((G.day-1)*3.65);
+  let rem=dayOfYear,mi=0;
+  while(mi<11&&rem>=MDAYS[mi]){rem-=MDAYS[mi];mi++;}
+  return{month:MONTHS[mi],day:rem+1};
+}
+function dateStr(){const d=gameDate();return`Y${G.year} D${G.day}`;}
+function fullDateStr(){const d=gameDate();return`Year ${G.year} — ${d.month} ${d.day}`;}
+
+// ═══════════════════════════════════════════════════════
+// NOTIFICATIONS
+// ═══════════════════════════════════════════════════════
+function notify(msg,type=''){
+  const log=document.getElementById('notif-log');if(!log)return;
+  const d=document.createElement('div');
+  d.className='notif-card '+(type||'info');
+  const icons={info:'i',danger:'!',success:'✓',warn:'!'};
+  d.innerHTML=`<div class="notif-icon ${type||'info'}">${icons[type]||'i'}</div><div class="notif-body"><div class="notif-msg">${msg}</div><div class="notif-time">${dateStr()}</div></div><button class="notif-close" onclick="this.closest('.notif-card').remove()">×</button>`;
+  log.prepend(d);
+  // Trim to 30 notifications
+  while(log.children.length>30)log.lastChild.remove();
+}
+
+// ═══════════════════════════════════════════════════════
+// ARRIVAL POPUP
+// ═══════════════════════════════════════════════════════
+function showNextArrival(){
+  const popup=document.getElementById('arrival-popup');
+  if(!G.arrivals.length){popup.classList.remove('visible');return;}
+  const v=G.arrivals[0];
+  document.getElementById('arr-name').textContent=v.name;
+  document.getElementById('arr-sub').textContent=`Age ${v.age} \u2022 Seeks refuge`;
+  document.getElementById('arr-stats').innerHTML=`<span>♥ ${v.hp}</span><span>⚔ ${v.str+v.agi}</span><span>💧 ${v.thirst}</span>`;
+  popup.classList.add('visible');
+}
+function acceptArrival(){
+  if(!G.arrivals.length)return;
+  const v=G.arrivals.shift();
+  G.villagers.push(v);
+  notify(`${v.name} has joined your village!`,'success');
+  renderVillagersTab();renderHUD();showNextArrival();
+}
+function denyArrival(){
+  if(!G.arrivals.length)return;
+  const v=G.arrivals.shift();
+  notify(`${v.name} was turned away.`,'warn');
+  showNextArrival();
+}
+function queueArrival(opts={}){
+  const v=mkVillager(opts);
+  G.arrivals.push(v);
+  notify(`${G.arrivals.length>1?'Another traveler':'1 traveler'} is requesting to join your village!`,'info');
+  if(G.arrivals.length===1)showNextArrival();
+}
+
+// ═══════════════════════════════════════════════════════
+// SHOP UI
+// ═══════════════════════════════════════════════════════
+function renderShop(){
+  const cats=document.getElementById('shop-cats');const items=document.getElementById('shop-items');if(!cats||!items)return;
+  const used=new Set(Object.values(CATALOG).map(c=>c.cat));
+  cats.innerHTML='';
+  for(const [k,l] of Object.entries(CATS)){
+    if(!used.has(k))continue;
+    const b=document.createElement('button');b.className='shop-cat'+(G.shopCat===k?' active':'');b.textContent=l;
+    b.onclick=()=>{G.shopCat=k;renderShop();};cats.appendChild(b);
+  }
+  items.innerHTML='';
+  for(const [id,c] of Object.entries(CATALOG)){
+    if(c.cat!==G.shopCat)continue;
+    const cost=bldCost(id);const canBuy=G.gold>=cost;
+    const div=document.createElement('div');div.className='shop-item'+(G.placing===id?' selected':'');
+    div.innerHTML=`<div class="shop-item-head"><span class="shop-item-name">${c.name}</span><span class="shop-item-cost">${fmt(cost)}g</span></div><div class="shop-item-desc">${c.desc}</div><div class="shop-item-meta">${c.workers>0?`<span>${c.workers}× ${JOBS[c.job]?.name||c.job}</span>`:'<span>No workers</span>'}${c.gps>0?`<span>+${c.gps.toFixed(1)}g/s</span>`:''}<span>${c.gw}×${c.gh}</span>${G.buildingCounts[id]?`<span>Own: ${G.buildingCounts[id]}</span>`:''}</div><button class="buy-btn" ${canBuy?'':'disabled'}>${G.placing===id?'Cancel Placement':'Place Building'}</button>`;
+    div.querySelector('.buy-btn').onclick=e=>{e.stopPropagation();if(G.placing===id){G.placing=null;document.getElementById('place-hint').style.display='none';}else if(canBuy){G.placing=id;document.getElementById('place-hint').style.display='block';}renderShop();};
+    items.appendChild(div);
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+// BUILDINGS LIST
+// ═══════════════════════════════════════════════════════
+function renderBuildingsList(){
+  const el=document.getElementById('buildings-list');if(!el)return;
+  if(!G.buildings.length){el.innerHTML='<div class="empty-state">No buildings placed yet.<br>Buy from the Shop tab.</div>';return;}
+  const jc={};for(const v of G.villagers)if(v.alive)jc[v.job]=(jc[v.job]||0)+1;
+  el.innerHTML='';
+  for(const b of G.buildings){
+    const c=CATALOG[b.typeId];const upName=b.upLevel>0&&c.ups[b.upLevel-1]?c.ups[b.upLevel-1].name:c.name;
+    const nextUp=c.ups[b.upLevel];let gps=c.gps;
+    for(let u=1;u<=b.upLevel;u++)if(c.ups[u-1]?.gpsAdd)gps+=c.ups[u-1].gpsAdd;
+    const div=document.createElement('div');div.className='placed-item';
+    div.innerHTML=`<div class="placed-item-head"><span class="placed-item-name">${upName}</span><span class="placed-item-id">#${b.id}${b.upLevel>0?' Lv'+b.upLevel:''}</span></div><div class="placed-item-body">${c.workers>0?`<div class="row"><span>Workers</span><span>${jc[c.job]||0}/${c.workers}</span></div>`:''}<div class="row"><span>Type</span><span>${c.name}</span></div>${c.gps>0?`<div class="row"><span>Income</span><span class="gold-text">+${gps.toFixed(1)}g/s</span></div>`:''}</div>${nextUp?`<button class="upgrade-btn" data-bid="${b.id}" ${G.gold>=nextUp.cost?'':'disabled'}>Upgrade → ${nextUp.name} (${fmt(nextUp.cost)}g)</button>`:''}`;
+    if(nextUp)div.querySelector('.upgrade-btn').onclick=()=>upgradeBuilding(b.id);
+    el.appendChild(div);
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+// VILLAGERS TAB
+// ═══════════════════════════════════════════════════════
+function renderVillagersTab(){
+  const al=living();
+  document.getElementById('vs-total').textContent=al.length;
+  document.getElementById('vs-housed').textContent=housingCap();
+  document.getElementById('vs-deceased').textContent=G.deceasedCount;
+  document.getElementById('vs-mil').textContent=milCount();
+  const list=document.getElementById('villager-list');if(!list)return;
+  const filter=G.vFilter;
+  let shown=G.villagers.filter(v=>{
+    if(filter==='idle')return v.alive&&v.job==='idle';
+    if(filter==='workers')return v.alive&&v.job!=='idle'&&!JOBS[v.job]?.mil;
+    if(filter==='combat')return v.alive&&JOBS[v.job]?.mil;
+    return true;
+  });
+  list.innerHTML='';
+  if(!shown.length){list.innerHTML='<div class="empty-state">No villagers to show.</div>';return;}
+  for(const v of shown){
+    const starCount=Math.min(5,v.combatLevel+(Math.floor((v.str+v.agi+v.intel)/5)));
+    const stars='★'.repeat(Math.max(1,starCount));
+    const jobLabel=JOBS[v.job]?.name||v.job;
+    const isMil=JOBS[v.job]?.mil;
+    const isDead=!v.alive;
+    const row=document.createElement('div');
+    const isSelected=selectedVillagerId===v.id;
+    row.className='v-row'+(isDead?' v-dead':'')+(isSelected?' expanded':'');
+    row.dataset.vid=v.id;
+    row.innerHTML=`
+      <div class="v-avatar" style="background:${isDead?'#2a2420':v.avatarCol}">${getInitials(v)}</div>
+      <div class="v-info">
+        <div class="v-name">${v.name}</div>
+        <div class="v-sub">
+          <span>Age ${v.age}</span>
+          <span class="job-tag${isMil?' mil':''}">${isDead?v.dead_cause||'Deceased':jobLabel}</span>
+          <span class="star">${stars}</span>
+          ${v.diseased?'<span style="color:var(--red2);font-size:11px">[Ill]</span>':''}
+        </div>
+      </div>
+      <div class="v-right">
+        <div class="v-bars">
+          <div class="v-bar"><div class="v-bar-hp" style="width:${v.hp}%"></div></div>
+          <div class="v-bar"><div class="v-bar-hunger" style="width:${v.hunger}%"></div></div>
+          <div class="v-bar"><div class="v-bar-thirst" style="width:${v.thirst}%"></div></div>
+        </div>
+        <span class="v-chevron" style="color:${isSelected?'var(--gold)':'var(--dim)'}">▶</span>
+      </div>
+    `;
+    row.onclick=()=>{
+      if(isSelected){closeVillagerDetail();}
+      else{openVillagerDetail(v);}
+      renderVillagersTab();
+    };
+    list.appendChild(row);
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+// DEFENCE TAB
+// ═══════════════════════════════════════════════════════
+function renderDefenceTab(){
+  const jobs=['guard','archer','soldier','knight'];
+  const ms=document.getElementById('mil-stats');
+  if(ms)ms.innerHTML=jobs.map(j=>`<div class="mil-stat"><div class="n">${G.villagers.filter(v=>v.alive&&v.job===j).length}</div><div class="l">${JOBS[j].name}s</div></div>`).join('')+`<div class="mil-stat"><div class="n">${G.buildings.filter(b=>b.typeId==='wooden_wall'||b.typeId==='watchtower').length}</div><div class="l">Defences</div></div><div class="mil-stat"><div class="n">${G.buildings.filter(b=>b.typeId==='barracks').length}</div><div class="l">Barracks</div></div>`;
+  const pa=document.getElementById('pending-attacks');
+  if(pa)pa.innerHTML=G.pendingAttacks.length?G.pendingAttacks.map(a=>`<div class="attack-item${a.daysLeft<5?' urgent':''}"><div class="attack-item-title">${a.name} — ${a.size} raiders</div><div class="attack-item-sub">Strength: ${a.strength}</div><div class="attack-timer">Arrives in ~${a.daysLeft} days</div></div>`).join(''):'<div class="empty-state">No known attacks inbound.</div>';
+  const bl=document.getElementById('battle-log');
+  if(bl)bl.innerHTML=G.battleLog.length?G.battleLog.slice().reverse().map(l=>`<div class="log-item"><span class="${l.won?'outcome-win':'outcome-loss'}">${l.won?'Victory':'Defeat'}</span> — ${l.desc}<br><span style="font-size:10px;color:var(--faint)">${l.date}</span></div>`).join(''):'<div class="empty-state">No battles recorded.</div>';
+  const ds=document.getElementById('def-status');
+  if(ds)ds.textContent=G.pendingAttacks.length?`${G.pendingAttacks.length} threat(s) approaching`:'No known threats';
+}
+
+// ═══════════════════════════════════════════════════════
+// ATTACKING TAB
+// ═══════════════════════════════════════════════════════
+function renderAttackingTab(){
+  document.getElementById('hostage-count').textContent=G.hostages.length;
+  document.getElementById('atk-refresh').textContent='Targets refresh: '+G.refreshLabel;
+  const tl=document.getElementById('attack-targets');
+  if(tl)tl.innerHTML=G.attackTargets.length?G.attackTargets.map(v=>`<div class="target-item"><div class="target-head"><span class="target-name">${v.name}</span><span class="target-wealth">Tier ${v.tier+1}</span></div><div class="target-body">Pop: ~${v.pop} &nbsp; Battles Won: ${v.battlesWon}<br>Est. reward: <span style="color:var(--gold2)">${fmt(Math.floor(50+v.wealth*80))}–${fmt(Math.floor(100+v.wealth*200+v.tier*100))}g</span></div><div class="target-actions"><button class="small-btn small-btn-attack" onclick="openRaidModal(${v.id})">Plan Raid</button></div></div>`).join(''):'<div class="empty-state">No targets available.</div>';
+  const hl=document.getElementById('hostages-list');
+  if(hl)hl.innerHTML=G.hostages.length?G.hostages.map(h=>`<div class="hostage-item"><div class="hostage-name">${h.name}</div><div class="hostage-status">From ${h.village} — HP: ${h.hp}%</div><button class="feed-btn" onclick="feedHostage(${h.id})">Feed (5g)</button></div>`).join(''):'<div class="empty-state" style="font-size:11px">No hostages.</div>';
+  const rl=document.getElementById('raid-log');
+  if(rl)rl.innerHTML=G.raidLog.length?G.raidLog.slice().reverse().map(l=>`<div class="log-item"><span class="${l.success?'outcome-win':'outcome-loss'}">${l.success?'Success':'Failed'}</span> — ${l.desc}</div>`).join(''):'<div class="empty-state" style="font-size:11px">No raids yet.</div>';
+}
+
+// ═══════════════════════════════════════════════════════
+// ALLIANCE TAB
+// ═══════════════════════════════════════════════════════
+function renderAllianceTab(){
+  document.getElementById('al-refresh').textContent='Offers refresh: '+G.alLabel;
+  const ol=document.getElementById('alliance-offers');
+  if(ol)ol.innerHTML=G.allianceOffers.length?G.allianceOffers.map(v=>`<div class="alliance-item"><div class="alliance-head"><span class="alliance-head-name">${v.name}</span><span style="font-size:11px;color:var(--dim)">Pop: ${v.pop}</span></div><div class="alliance-body-text">Tier ${v.tier+1} · Battles Won: ${v.battlesWon}<br>Seeking mutual security pact.</div><div class="alliance-actions"><button class="small-btn small-btn-peace" onclick="makeAlliance(${v.id},'peace')">Non-Aggression (50g)</button><button class="small-btn small-btn-full" onclick="makeAlliance(${v.id},'full')">Full Alliance (200g)</button></div></div>`).join(''):'<div class="empty-state">No villages seeking alliance.</div>';
+  const al=document.getElementById('active-alliances');
+  if(al)al.innerHTML=G.alliances.length?G.alliances.map(a=>`<div class="active-alliance-item"><div class="act-al-name">${a.name}<span class="alliance-type ${a.type==='peace'?'type-peace':'type-full'}">${a.type==='peace'?'Non-Aggression':'Full Alliance'}</span></div><div class="act-al-sub">${a.type==='full'?'Villagers may migrate here.':'Will not attack.'}</div><button class="break-btn" onclick="breakAlliance(${a.vid})">Break Alliance</button></div>`).join(''):'<div class="empty-state" style="font-size:11px">No alliances.</div>';
+}
+
+// ═══════════════════════════════════════════════════════
+// COMBAT
+// ═══════════════════════════════════════════════════════
+const REAL_MS_PER_DAY=400;
+const DAYS_PER_YEAR=100;
+
+function scheduleThreat(v){
+  if(G.pendingAttacks.find(a=>a.vid===v.id))return;
+  const visible=Math.random()<.6;
+  const daysLeft=Math.floor(rnd(5,30));
+  const size=Math.floor(rnd(3,8)+v.tier*2);
+  G.pendingAttacks.push({vid:v.id,name:v.name,size,strength:size*2+v.tier*3,daysLeft,timer:daysLeft*REAL_MS_PER_DAY});
+  if(visible)notify(`Scouts report: ${v.name} is sending ${size} raiders!`,'warn');
+  renderDefenceTab();
+}
+
+function triggerImmediateAttack(v){
+  if(G.gameOver)return;
+  const size=Math.floor(rnd(2,6)+v.tier);
+  const attack={vid:v.id,name:v.name,size,strength:size*2+v.tier*3,daysLeft:0};
+  notify(`${v.name} is attacking your village right now!`,'danger');
+  setTimeout(()=>executeDefenceEvent(attack),1000);
+}
+
+function executeDefenceEvent(attack){
+  if(G.gameOver)return;
+  const al=living();if(!al.length)return;
+  const military=al.filter(v=>JOBS[v.job]?.mil);
+  const defStr=military.reduce((s,v)=>s+v.combatLevel*(v.str+v.agi),0)+G.buildings.filter(b=>b.typeId==='wooden_wall'||b.typeId==='watchtower').length*5;
+  const ratio=defStr/(attack.strength+1);
+  const won=ratio>0.7||Math.random()<Math.min(.9,ratio);
+  let casualties=0;const dieChance=won?.1:.4;
+  for(const v of al){if(Math.random()<(JOBS[v.job]?.mil?dieChance:dieChance*.3)){kill(v,'killed defending the village');casualties++;}}
+  const desc=`${attack.name} raided with ${attack.size}. ${casualties} died.`;
+  G.battleLog.push({won,desc,date:dateStr()});
+  G.pendingAttacks=G.pendingAttacks.filter(a=>a.vid!==attack.vid);
+  if(won){G.gold+=Math.floor(rnd(20,80));notify(`${attack.name}'s raid was repelled!${casualties?' '+casualties+' died defending.':''}`,'success');}
+  else{notify(`Raid by ${attack.name}! ${casualties} died defending.`,'danger');if(!living().length)triggerGameOver();}
+  renderVillagersTab();renderDefenceTab();renderHUD();
+}
+
+function triggerGameOver(){
+  G.gameOver=true;
+  document.getElementById('modal-title').textContent='Your Village Falls';
+  document.getElementById('modal-body').innerHTML=`<p style="font-size:14px;line-height:1.8">Your last villager has fallen. The village lies in ruins.</p><p style="margin-top:10px;font-size:13px;color:var(--dim)">Survived to <b>${fullDateStr()}</b>.<br>Total battles: <b>${G.battleLog.length}</b></p>`;
+  document.getElementById('modal-footer').innerHTML=`<button class="btn btn-primary" onclick="location.reload()">Begin Anew</button>`;
+  document.getElementById('modal-close').style.display='none';
+  openModal();
+}
+
+function openRaidModal(vid){
+  const v=G.worldVillages.find(x=>x.id===vid);if(!v)return;
+  const military=G.villagers.filter(x=>x.alive&&JOBS[x.job]?.mil);
+  document.getElementById('modal-title').textContent=`Raid: ${v.name}`;
+  const body=document.getElementById('modal-body');
+  body.innerHTML=`<p style="font-size:13px;color:var(--dim);margin-bottom:12px">Select units to send. Higher combat strength increases success chance. <span style="color:var(--gold2)">Units may die even on success.</span></p><div style="font-family:Cinzel,serif;font-size:10px;color:var(--dim);text-transform:uppercase;margin-bottom:6px">Military Units (${military.length})</div>${!military.length?'<div class="empty-state">No military. Train soldiers first.</div>':''}<div id="raid-unit-list" style="display:grid;grid-template-columns:1fr 1fr;gap:4px;max-height:200px;overflow-y:auto">${military.map(u=>`<div class="job-opt" data-uid="${u.id}"><div class="job-opt-name">${u.name}</div><div class="job-opt-desc">${JOBS[u.job].name} · Lv${u.combatLevel} · HP:${u.hp}</div></div>`).join('')}</div><div style="margin-top:10px;font-size:12px;color:var(--dim)" id="raid-odds">Select units above.</div>`;
+  const sel=new Set();
+  body.querySelectorAll('.job-opt').forEach(el=>{el.onclick=()=>{const uid=parseInt(el.dataset.uid);sel.has(uid)?sel.delete(uid):sel.add(uid);el.classList.toggle('active',sel.has(uid));const str=G.villagers.filter(u=>sel.has(u.id)).reduce((s,u)=>s+u.combatLevel*(u.str+u.agi),0);const need=v.pop*.8+v.battlesWon*2+v.tier*5;const odds=Math.min(95,Math.max(5,Math.round(str/(need||1)*80)));document.getElementById('raid-odds').textContent=`Success: ~${odds}% (${sel.size} units, strength: ${str})`;};});
+  window._raidSel=sel;
+  document.getElementById('modal-footer').innerHTML=`<button class="btn btn-neutral" onclick="closeModal()">Cancel</button><button class="btn btn-danger" onclick="executeRaid(${vid},window._raidSel)">Send Raid</button>`;
+  openModal();
+}
+
+function executeRaid(vid,sel){
+  closeModal();
+  const v=G.worldVillages.find(x=>x.id===vid);if(!v||sel.size===0){notify('Select at least one unit.','warn');return;}
+  const units=G.villagers.filter(u=>sel.has(u.id)&&u.alive);
+  const str=units.reduce((s,u)=>s+u.combatLevel*(u.str+u.agi),0);
+  const need=v.pop*.8+v.battlesWon*2+v.tier*5;
+  const odds=Math.min(95,Math.max(5,str/(need||1)*80))/100;
+  const success=Math.random()<odds;let dead=0;
+  units.forEach(u=>{if(Math.random()<(success?.15:.45)){kill(u,'killed in battle');dead++;}else if(Math.random()<.3)u.hp=Math.max(10,u.hp-r(30));});
+  if(success){
+    const reward=Math.floor(rnd(50+v.wealth*80,100+v.wealth*200+v.tier*100));G.gold+=reward;
+    const hostageTaken=Math.random()<.3;
+    if(hostageTaken)G.hostages.push({id:G.villagerId++,name:rndName(r(2)===0),village:v.name,hp:80+r(20)});
+    G.raidLog.push({success:true,desc:`Raided ${v.name}. +${fmt(reward)}g.${dead?' '+dead+' lost.':''}${hostageTaken?' Hostage taken.':''}`,date:dateStr()});
+    notify(`Raid success! +${fmt(reward)}g from ${v.name}.${hostageTaken?' Hostage taken.':''}`,'success');
+    if(Math.random()<.3){v.hostile=true;scheduleThreat(v);}
+  }else{
+    v.battlesWon++;if(Math.random()<.5)v.hostile=true;
+    G.raidLog.push({success:false,desc:`Raid on ${v.name} failed.${dead?' '+dead+' lost.':''}`,date:dateStr()});
+    notify(`Raid on ${v.name} failed!${dead?' '+dead+' lost.':''}`,'danger');
+    if(v.hostile)scheduleThreat(v);
+  }
+  renderHUD();renderAttackingTab();renderVillagersTab();
+}
+
+function feedHostage(hid){const h=G.hostages.find(x=>x.id===hid);if(!h)return;if(G.gold<5)return notify('Need 5g.','warn');G.gold-=5;h.hp=Math.min(100,h.hp+20);renderHUD();renderAttackingTab();}
+
+function makeAlliance(vid,type){
+  const v=G.worldVillages.find(x=>x.id===vid);if(!v)return;
+  const cost=type==='peace'?50:200;
+  if(G.gold<cost)return notify(`Need ${cost}g.`,'warn');
+  G.gold-=cost;v.allianceWith=type;v.hostile=false;
+  G.alliances.push({vid:v.id,name:v.name,type});
+  G.pendingAttacks=G.pendingAttacks.filter(a=>a.vid!==vid);
+  G.allianceOffers=G.allianceOffers.filter(x=>x.id!==vid);
+  notify(`Alliance formed with ${v.name}!${type==='full'?' Villagers may migrate.':''}`,'success');
+  if(type==='full'&&Math.random()<.5)setTimeout(()=>allianceMigrant(v),rnd(30000,90000));
+  renderHUD();renderAllianceTab();renderDefenceTab();
+}
+function allianceMigrant(v){
+  if(!G.alliances.find(a=>a.vid===v.id))return;
+  const n=1+r(2);
+  for(let i=0;i<n;i++)queueArrival();
+  notify(`Migrants arriving from ${v.name}!`);
+}
+function breakAlliance(vid){
+  const v=G.worldVillages.find(x=>x.id===vid);if(v)v.allianceWith=false;
+  G.alliances=G.alliances.filter(a=>a.vid!==vid);
+  notify('Alliance broken.','warn');
+  if(v&&Math.random()<.4){v.hostile=true;scheduleThreat(v);}
+  renderAllianceTab();
+}
+
+// ═══════════════════════════════════════════════════════
+// HUD
+// ═══════════════════════════════════════════════════════
+function fmt(n){if(n>=1000000)return(n/1000000).toFixed(1)+'M';if(n>=1000)return(n/1000).toFixed(1)+'K';return String(Math.floor(n));}
+function renderHUD(){
+  document.getElementById('hud-gold').textContent=fmt(Math.floor(G.gold));
+  document.getElementById('hud-gps').textContent=`(${G.gps>=0?'+':''}${G.gps.toFixed(1)}/s)`;
+  document.getElementById('hud-pop').textContent=living().length;
+  document.getElementById('hud-cap').textContent=housingCap();
+  document.getElementById('hud-defence').textContent=milCount();
+  document.getElementById('hud-houses').textContent=G.buildings.filter(b=>CATALOG[b.typeId].cat==='housing').length;
+  document.getElementById('hud-date').textContent=fullDateStr();
+}
+
+// ── VILLAGER DETAIL PANEL ──
+let selectedVillagerId=null;
+function openVillagerDetail(v){
+  selectedVillagerId=v.id;
+  const panel=document.getElementById('v-detail-panel');
+  panel.classList.remove('hidden');
+  refreshVillagerDetail(v);
+}
+function refreshVillagerDetail(v){
+  if(!v)return;
+  document.getElementById('vd-portrait').style.background=v.alive?v.avatarCol:'#2a2020';
+  document.getElementById('vd-initials').textContent=getInitials(v);
+  document.getElementById('vd-status').textContent=`Age ${v.age}${v.diseased?' · Ill':''}${!v.alive?' · '+v.dead_cause:''}`;
+  document.getElementById('vd-name').textContent=v.name;
+  document.getElementById('vd-job-label').textContent=JOBS[v.job]?.name||v.job;
+  // Bars
+  document.getElementById('vdb-hp').style.width=v.hp+'%';document.getElementById('vdv-hp').textContent=Math.floor(v.hp)+'%';
+  document.getElementById('vdb-hunger').style.width=v.hunger+'%';document.getElementById('vdv-hunger').textContent=Math.floor(v.hunger)+'%';
+  document.getElementById('vdb-thirst').style.width=v.thirst+'%';document.getElementById('vdv-thirst').textContent=Math.floor(v.thirst)+'%';
+  // Stats grid
+  document.getElementById('vd-stats').innerHTML=`
+    <div class="vd-stat"><div class="n">${v.str}</div><div class="l">Strength</div></div>
+    <div class="vd-stat"><div class="n">${v.agi}</div><div class="l">Agility</div></div>
+    <div class="vd-stat"><div class="n">${v.intel}</div><div class="l">Intellect</div></div>
+    <div class="vd-stat"><div class="n" style="color:var(--gold)">${v.combatLevel}</div><div class="l">Combat Lv</div></div>
+    <div class="vd-stat"><div class="n">${v.age}</div><div class="l">Age</div></div>
+    <div class="vd-stat"><div class="n">${v.male?'M':'F'}</div><div class="l">Gender</div></div>
+  `;
+  // Job grid
+  if(v.alive){
+    const grid=document.getElementById('vd-job-grid');
+    grid.innerHTML=Object.entries(JOBS).map(([jid,j])=>{
+      const locked=!j.free&&!hasBuilding(jid);
+      return`<div class="vd-job-opt${v.job===jid?' active':''}${locked?' locked':''}" data-job="${jid}" data-vid="${v.id}">
+        <div class="vd-job-opt-name">${j.name}</div>
+        <div class="vd-job-opt-sub">${locked?'Requires building':(!j.free?j.desc.replace(/ \([^)]+\)/,''):'')}</div>
+      </div>`;
+    }).join('');
+    grid.querySelectorAll('.vd-job-opt:not(.locked)').forEach(el=>{
+      el.onclick=()=>{
+        v.job=el.dataset.job;
+        if(JOBS[v.job].mil)G.hasMilitary=true;
+        calcGPS();refreshVillagerDetail(v);renderVillagersTab();
+      };
+    });
+  } else {
+    document.getElementById('vd-job-grid').innerHTML='<div class="empty-state" style="font-size:11px;grid-column:span 2">This villager has passed away.</div>';
+  }
+}
+function closeVillagerDetail(){
+  selectedVillagerId=null;
+  document.getElementById('v-detail-panel').classList.add('hidden');
+}
+
+// ── MENU ──
+function initMenu(){
+  const mc=document.getElementById('menu-canvas');
+  function resizeMenu(){mc.width=window.innerWidth;mc.height=window.innerHeight;drawMenuBg();}
+  function drawMenuBg(){
+    const ctx=mc.getContext('2d');
+    drawDunes(ctx,mc.width,mc.height,42);
+    // Vignette
+    const vig=ctx.createRadialGradient(mc.width/2,mc.height/2,mc.height*.1,mc.width/2,mc.height/2,mc.width*.8);
+    vig.addColorStop(0,'rgba(0,0,0,0)');vig.addColorStop(1,'rgba(0,0,0,.6)');
+    ctx.fillStyle=vig;ctx.fillRect(0,0,mc.width,mc.height);
+  }
+  window.addEventListener('resize',resizeMenu);
+  resizeMenu();
+  document.getElementById('menu-start').onclick=()=>{
+    document.getElementById('menu-screen').style.display='none';
+    document.body.classList.add('game-started');
+    init();
+  };
+}
+
+// ═══════════════════════════════════════════════════════
+// DAILY / YEARLY EVENTS
+// ═══════════════════════════════════════════════════════
+function dailyEvents(){
+  for(const v of living()){
+    v.hunger=Math.max(0,v.hunger-rnd(.08,.18));
+    v.thirst=Math.max(0,v.thirst-rnd(.12,.25));
+    // Base foraging — keeps villagers alive briefly without buildings
+    v.hunger=Math.min(100,v.hunger+.04);
+    v.thirst=Math.min(100,v.thirst+.06);
+    const farms=G.buildings.filter(b=>CATALOG[b.typeId].cat==='food'||b.typeId==='irrigation'||b.typeId==='pond').length;
+    const wells=G.buildings.filter(b=>b.typeId==='well'||b.typeId==='pond'||b.typeId==='irrigation'||b.typeId==='water_tower'||b.typeId==='fountain').length;
+    if(farms>0)v.hunger=Math.min(100,v.hunger+farms*.4);
+    if(wells>0)v.thirst=Math.min(100,v.thirst+wells*.7);
+    if(v.hunger<10)v.hp=Math.max(0,v.hp-rnd(.5,1.5));
+    if(v.thirst<10)v.hp=Math.max(0,v.hp-rnd(1,3));
+    if(!v.diseased&&Math.random()<.0008){
+      v.diseased=true;v.diseaseTimer=5+r(10);
+      const diseases=['Smallpox','Plague','Fever','Dysentery','Cholera'];
+      notify(`${v.name} has contracted ${diseases[r(diseases.length)]}!`,'danger');
+    }
+    if(v.diseased){
+      v.hp=Math.max(0,v.hp-rnd(.5,2));v.diseaseTimer--;
+      const docs=G.villagers.filter(x=>x.alive&&x.job==='doctor').length;
+      if(docs>0){v.diseaseTimer=Math.max(0,v.diseaseTimer-docs*.5);v.hp=Math.min(100,v.hp+docs*.3);}
+      if(v.diseaseTimer<=0){v.diseased=false;v.hp=Math.min(100,v.hp+15);}
+    }
+    if(!v.diseased&&v.hunger>50&&v.thirst>50)v.hp=Math.min(100,v.hp+rnd(.05,.2));
+    if(v.hp<=0)kill(v,v.hunger<15?'starvation':v.thirst<15?'dehydration':v.diseased?'disease':'unknown causes');
+    if(JOBS[v.job]?.mil){
+      const tr=G.buildings.filter(b=>['archery_range','barracks','training_dummy'].includes(b.typeId)).length;
+      if(tr>0){v.combatXp+=tr*.5;if(v.combatXp>=v.combatLevel*50){v.combatLevel++;v.combatXp=0;}}
+    }
+  }
+  for(const h of G.hostages){h.hp=Math.max(0,h.hp-rnd(.5,1.5));if(h.hp<=0){G.hostages=G.hostages.filter(x=>x.id!==h.id);notify(`Hostage ${h.name} died.`,'danger');}}
+  for(const a of G.pendingAttacks){a.daysLeft--;if(a.daysLeft<=0){executeDefenceEvent(a);return;}}
+  G.pendingAttacks=G.pendingAttacks.filter(a=>a.daysLeft>0);
+  if(!living().length&&!G.gameOver)triggerGameOver();
+}
+function yearlyEvents(){
+  for(const v of living()){v.age++;if(v.age>70+r(15))kill(v,'old age');}
+  if(living().length>1&&Math.random()<.3+G.alliances.length*.1){
+    const n=1+r(2);
+    for(let i=0;i<n;i++)queueArrival();
+  }
+  // Attacks come when player has military OR has progressed (3+ villagers or 5+ buildings)
+  const progressed=G.hasMilitary||living().length>=3||G.buildings.length>=5;
+  if(progressed&&Math.random()<.3){
+    const foes=G.worldVillages.filter(v=>!v.allianceWith&&!v.defeated);
+    if(foes.length){
+      const foe=foes[r(foes.length)];
+      // 35% chance of surprise immediate attack, 65% chance of impending (warning)
+      if(Math.random()<.35)triggerImmediateAttack(foe);
+      else scheduleThreat(foe);
+    }
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+// MODAL
+// ═══════════════════════════════════════════════════════
+function openModal(){document.getElementById('modal-overlay').classList.add('open');}
+function closeModal(){document.getElementById('modal-overlay').classList.remove('open');}
+
+// ═══════════════════════════════════════════════════════
+// TAB SWITCHING
+// ═══════════════════════════════════════════════════════
+let activeTab='map';
+function switchTab(tab){
+  activeTab=tab;
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.toggle('active',b.dataset.tab===tab));
+  document.querySelectorAll('.tab-pane').forEach(p=>p.classList.toggle('active',p.id==='tab-'+tab));
+  if(tab==='map'){resizeCanvas();renderShop();renderBuildingsList();}
+  if(tab==='villagers')renderVillagersTab();
+  if(tab==='defence')renderDefenceTab();
+  if(tab==='attacking')renderAttackingTab();
+  if(tab==='alliance')renderAllianceTab();
+}
+
+// ═══════════════════════════════════════════════════════
+// MAP EVENTS
+// ═══════════════════════════════════════════════════════
+function getBuildingAtCanvas(cx,cy){
+  const w=cToW(cx,cy);
+  for(let i=G.buildings.length-1;i>=0;i--){
+    const b=G.buildings[i];const c=CATALOG[b.typeId];
+    const bx=b.gx*GRID,by=b.gy*GRID;
+    if(w.x>=bx&&w.x<bx+c.gw*GRID&&w.y>=by&&w.y<by+c.gh*GRID) return b;
+  }
+  return null;
+}
+function demolishBuilding(b){
+  const c=CATALOG[b.typeId];
+  G.buildings=G.buildings.filter(x=>x.id!==b.id);
+  G.buildingCounts[b.typeId]=Math.max(0,(G.buildingCounts[b.typeId]||1)-1);
+  calcGPS();renderBuildingsList();renderShop();renderMap();renderHUD();
+  notify(`${c.name} demolished.`,'warn');
+}
+function initMapEvents(){
+  const cv=document.getElementById('map-canvas');
+  cv.addEventListener('mousedown',e=>{if(G.placing||e.button!==0)return;G.map.drag=true;G.map.dx=e.clientX;G.map.dy=e.clientY;G.map.dox=G.map.ox;G.map.doy=G.map.oy;cv.style.cursor='grabbing';});
+  cv.addEventListener('mousemove',e=>{const rect=cv.getBoundingClientRect();G.map.mouseX=e.clientX-rect.left;G.map.mouseY=e.clientY-rect.top;if(G.map.drag){G.map.ox=G.map.dox-(e.clientX-G.map.dx)/G.map.scale;G.map.oy=G.map.doy-(e.clientY-G.map.dy)/G.map.scale;}if(G.placing)renderMap();});
+  cv.addEventListener('mouseup',e=>{
+    if(e.button!==0)return;
+    if(G.map.drag){G.map.drag=false;cv.style.cursor=G.placing?'crosshair':'default';return;}
+    if(G.placing){const w=cToW(G.map.mouseX,G.map.mouseY);const sg=snapGrid(w.x,w.y);if(!placeBuilding(G.placing,sg.gx,sg.gy))notify('Cannot place here — not enough gold or space.','warn');else{renderShop();renderMap();}}
+  });
+  cv.addEventListener('contextmenu',e=>{
+    e.preventDefault();
+    if(G.placing){G.placing=null;document.getElementById('place-hint').style.display='none';renderShop();return;}
+    const rect=cv.getBoundingClientRect();
+    const b=getBuildingAtCanvas(e.clientX-rect.left,e.clientY-rect.top);
+    if(!b)return;
+    const c=CATALOG[b.typeId];
+    const upName=b.upLevel>0&&c.ups[b.upLevel-1]?c.ups[b.upLevel-1].name:c.name;
+    window._demolishTarget=b;
+    document.getElementById('modal-title').textContent=`Demolish ${upName}?`;
+    document.getElementById('modal-body').innerHTML=`<p style="font-size:14px;line-height:1.8;color:var(--dim)">Are you sure you want to demolish <b style="color:var(--text)">${upName}</b>?</p><p style="margin-top:8px;font-size:13px;color:var(--red2)">You will receive <b>no gold refund</b>. This cannot be undone.</p>`;
+    document.getElementById('modal-footer').innerHTML=`<button class="btn btn-neutral" onclick="closeModal()">Cancel</button><button class="btn btn-danger" onclick="demolishBuilding(window._demolishTarget);closeModal()">Demolish</button>`;
+    openModal();
+  });
+  cv.addEventListener('mouseleave',()=>{if(G.map.drag){G.map.drag=false;cv.style.cursor='default';}});
+  cv.addEventListener('wheel',e=>{e.preventDefault();G.map.scale=Math.max(.3,Math.min(3,G.map.scale+(e.deltaY>0?-.1:.1)));renderMap();},{passive:false});
+  document.addEventListener('keydown',e=>{if(e.key==='Escape'){G.placing=null;document.getElementById('place-hint').style.display='none';renderShop();}});
+  document.getElementById('btn-recenter').onclick=()=>{G.map.ox=0;G.map.oy=0;renderMap();};
+  document.getElementById('btn-zoom-in').onclick=()=>{G.map.scale=Math.min(3,G.map.scale+.2);renderMap();};
+  document.getElementById('btn-zoom-out').onclick=()=>{G.map.scale=Math.max(.3,G.map.scale-.2);renderMap();};
+}
+
+// Lightweight villager bar updater — does NOT rebuild DOM (so clicks work)
+function updateVillagerBarsOnly(){
+  const al=living();
+  const eTotal=document.getElementById('vs-total');if(eTotal)eTotal.textContent=al.length;
+  const eHoused=document.getElementById('vs-housed');if(eHoused)eHoused.textContent=housingCap();
+  const eDec=document.getElementById('vs-deceased');if(eDec)eDec.textContent=G.deceasedCount;
+  const eMil=document.getElementById('vs-mil');if(eMil)eMil.textContent=milCount();
+  const list=document.getElementById('villager-list');if(!list)return;
+  for(const v of G.villagers){
+    const row=list.querySelector(`[data-vid="${v.id}"]`);if(!row)continue;
+    const hp=row.querySelector('.v-bar-hp');if(hp)hp.style.width=v.hp+'%';
+    const hu=row.querySelector('.v-bar-hunger');if(hu)hu.style.width=v.hunger+'%';
+    const th=row.querySelector('.v-bar-thirst');if(th)th.style.width=v.thirst+'%';
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+// GAME LOOP
+// ═══════════════════════════════════════════════════════
+let lastTick=Date.now(),dayAccum=0;
+const REFRESH_INTERVAL=300000;
+function gameTick(){
+  if(G.gameOver)return;
+  const now=Date.now();const dt=Math.min(now-lastTick,200);lastTick=now;
+  G.gold=Math.max(0,G.gold+G.gps*(dt/1000));
+  dayAccum+=dt;
+  while(dayAccum>=REAL_MS_PER_DAY){dayAccum-=REAL_MS_PER_DAY;G.day++;dailyEvents();if(G.day>DAYS_PER_YEAR){G.day=1;G.year++;yearlyEvents();}}
+  G.refreshTimer-=dt;G.alRefreshTimer-=dt;
+  const rl=Math.max(0,G.refreshTimer);const al=Math.max(0,G.alRefreshTimer);
+  G.refreshLabel=`${Math.floor(rl/60000)}:${String(Math.floor((rl%60000)/1000)).padStart(2,'0')}`;
+  G.alLabel=`${Math.floor(al/60000)}:${String(Math.floor((al%60000)/1000)).padStart(2,'0')}`;
+  if(G.refreshTimer<=0){G.refreshTimer=REFRESH_INTERVAL;refreshTargets();notify('New raid targets available.');if(activeTab==='attacking')renderAttackingTab();}
+  if(G.alRefreshTimer<=0){G.alRefreshTimer=REFRESH_INTERVAL;refreshAllianceOffers();notify('New alliance opportunities available.');if(activeTab==='alliance')renderAllianceTab();}
+  calcGPS();renderHUD();
+  if(activeTab==='map')renderMap();
+  if(activeTab==='villagers')updateVillagerBarsOnly();
+  if(activeTab==='defence')renderDefenceTab();
+  if(activeTab==='attacking')renderAttackingTab();
+  if(activeTab==='alliance')renderAllianceTab();
+}
+
+// ═══════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════
+function init(){
+  genWorld();refreshTargets();refreshAllianceOffers();
+  resizeCanvas();renderShop();renderBuildingsList();renderHUD();
+  initMapEvents();
+  document.querySelectorAll('.tab-btn').forEach(b=>b.onclick=()=>switchTab(b.dataset.tab));
+  document.querySelectorAll('.sidebar-tab').forEach(b=>b.onclick=()=>{
+    document.querySelectorAll('.sidebar-tab').forEach(x=>x.classList.toggle('active',x.dataset.stab===b.dataset.stab));
+    document.querySelectorAll('.sidebar-panel').forEach(p=>p.classList.toggle('active',p.id==='stab-'+b.dataset.stab));
+    if(b.dataset.stab==='shop')renderShop();if(b.dataset.stab==='buildings')renderBuildingsList();
+  });
+  document.querySelectorAll('.vf-btn').forEach(b=>b.onclick=()=>{G.vFilter=b.dataset.filter;document.querySelectorAll('.vf-btn').forEach(x=>x.classList.toggle('active',x.dataset.filter===b.dataset.filter));renderVillagersTab();});
+  document.getElementById('modal-close').onclick=closeModal;
+  document.getElementById('modal-overlay').onclick=e=>{if(e.target===document.getElementById('modal-overlay'))closeModal();};
+  document.getElementById('arr-yes').onclick=acceptArrival;
+  document.getElementById('arr-no').onclick=denyArrival;
+  document.getElementById('vd-close').onclick=()=>{closeVillagerDetail();renderVillagersTab();};
+  window.addEventListener('resize',resizeCanvas);
+  // Random alliance requests
+  setInterval(()=>{if(living().length>=5&&Math.random()<.4){const c=G.worldVillages.filter(v=>!v.allianceWith&&!G.alliances.find(a=>a.vid===v.id));if(c.length){const v=c[r(c.length)];notify(`${v.name} has sent an alliance request!`,'warn');if(!G.allianceOffers.find(x=>x.id===v.id))G.allianceOffers.unshift(v);if(activeTab==='alliance')renderAllianceTab();}}},90000);
+  // Spontaneous arrivals
+  setInterval(()=>{if(living().length>0&&Math.random()<.3){const n=1+r(2);for(let i=0;i<n;i++)queueArrival();}},120000);
+  lastTick=Date.now();
+  setInterval(gameTick,50);
+  // Keep detail panel up to date
+  setInterval(()=>{if(selectedVillagerId){const v=G.villagers.find(x=>x.id===selectedVillagerId);if(v)refreshVillagerDetail(v);}},500);
+  // First arrival
+  setTimeout(()=>queueArrival({age:r(2)?28:24,male:r(2)===0}),500);
+}
+document.addEventListener('DOMContentLoaded',()=>initMenu());
+</script>
+</body>
+</html>
