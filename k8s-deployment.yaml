@@ -69,4 +69,30 @@ spec:
   - protocol: TCP
     port: 80
     targetPort: 3000
-  type: LoadBalancer
+  type: ClusterIP
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: village-chronicles-ingress
+  namespace: village
+  annotations:
+    cert-manager.io/cluster-issuer: "ctfd-cluster-issuer"
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+spec:
+  ingressClassName: nginx-k8s
+  tls:
+  - hosts:
+    - villagechronicles.awesomeinterface.com
+    secretName: village-chronicles-tls
+  rules:
+  - host: villagechronicles.awesomeinterface.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: village-chronicles-service
+            port:
+              number: 80
