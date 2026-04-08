@@ -1,6 +1,6 @@
 # Village Chronicles
 
-A medieval idle village-building game. Build your settlement, manage resources, defend against threats, and conquer rivals.
+A medieval idle village-building game. Build your settlement, manage resources, defend against threats, and conquer rivals. Progress through the ages as your village evolves from a humble hamlet into a powerful kingdom.
 
 ## Gameplay
 
