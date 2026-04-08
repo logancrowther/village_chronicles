@@ -79,6 +79,8 @@ metadata:
   annotations:
     cert-manager.io/cluster-issuer: "ctfd-cluster-issuer"
     nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/compute-full-forwarded-for: "true"
+    nginx.ingress.kubernetes.io/use-forwarded-headers: "true"
 spec:
   ingressClassName: nginx-k8s
   tls:
