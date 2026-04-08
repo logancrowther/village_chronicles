@@ -8,6 +8,17 @@ A medieval idle village-building game. Build your settlement, manage resources, 
 - **Survive** — manage gold income, population, and defences
 - **Conquer** — form alliances or wage war on neighbouring villages
 
+### Game Systems
+
+| System | Description |
+|--------|-------------|
+| Economy | Earn gold over time; spend it on buildings and upgrades |
+| Population | Houses increase capacity; villagers generate income |
+| Defence | Build walls and train guards to repel raids |
+| Combat | Attack neighbouring villages to loot resources |
+| Alliances | Form pacts with other villages for mutual protection |
+| Catalogue | Unlock new buildings and units as your village grows |
+
 ## Running Locally
 
 **Prerequisites:** Node.js 20+
@@ -50,6 +61,31 @@ This creates:
 - A `Deployment` running the app on port 3000
 - A `ClusterIP` Service
 - An `Ingress` with TLS termination
+
+To tear down:
+
+```bash
+kubectl delete -f k8s-deployment.yaml
+```
+
+## Project Structure
+
+```
+village_chronicles/
+├── public/
+│   ├── index.html        # Game UI
+│   ├── css/styles.css    # Styles
+│   └── js/               # Game modules
+│       ├── game.js       # Core game loop
+│       ├── economy.js    # Gold & resources
+│       ├── combat.js     # Combat system
+│       ├── villagers.js  # Villager management
+│       ├── map.js        # World map
+│       └── ...
+├── server.js             # Express server
+├── Dockerfile
+└── k8s-deployment.yaml
+```
 
 ## Tech Stack
 
